@@ -1,0 +1,54 @@
+{% extends "dashboard.html" %}
+
+    {% block main_content %}
+    
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Available Surveys</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          {% comment %} <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+          </div> {% endcomment %}
+          <a href="{% url 'survey-create' %}" type="button" class="btn btn-sm btn-outline-secondary">
+            Create New Survey
+          </a>
+          <a href="{% url 'survey-responses' %}" type="button" class="btn btn-sm btn-outline-success">Survey Responses
+            <span class="badge text-bg-secondary">{{ responses_count }}</span>
+          </a>
+        </div>
+      </div>
+    <ul class="list-group">  
+        {% comment %} {% for survey in surveys %}   {% endcomment %}
+        {% for s in survey_data %}  
+            <li class="list-group-item">  
+                <h5>{{ s.survey.title }}</h5>  
+                <p>{{ s.survey.description }}</p>
+                <div class="btn-group me-2">
+                    <a href="{% url 'survey-response' s.survey.id %}" type="button" class="btn btn-sm btn-outline-info">Take Survey
+                      <span class="badge text-bg-secondary">{{ s.question_count }}</span>
+                    </a>
+                    <a href="{% url 'survey-detail' s.survey.id %}" type="button" class="btn btn-sm btn-outline-primary">Survey Details</a>
+                    <a href="{% url 'survey-specific-responses' s.survey.id %}" type="button" class="btn btn-sm btn-outline-success">Survey Responses
+                      <span class="badge text-bg-secondary">{{ s.response_count }}</span>
+                    </a>
+                    <a href="{% url 'survey-update' s.survey.id %}" type="button" class="btn btn-sm btn-outline-secondary">Update</a>
+                    <a href="{% url 'survey-delete' s.survey.id %}" type="button" class="btn btn-sm btn-outline-danger">Delete</a>
+                  </div>
+            </li>  
+        {% endfor %}  
+    </ul>
+
+ {% comment %} <h1>Surveys</h1>  
+<a href="{% url 'survey-create' %}">Create Survey</a>  
+<ul>  
+    {% for survey in object_list %}  
+        <li>  
+            <a href="{% url 'survey-detail' survey.pk %}">{{ survey.title }}</a>  
+            <a href="{% url 'survey-edit' survey.pk %}">Edit</a>  
+            <a href="{% url 'survey-delete' survey.pk %}">Delete</a>  
+        </li>  
+    {% endfor %}  
+</ul> {% endcomment %}
+    {% endblock main_content %}
+{% comment %}</body>  
+</html> {% endcomment %}

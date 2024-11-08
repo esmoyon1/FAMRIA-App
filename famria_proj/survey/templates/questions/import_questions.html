@@ -1,0 +1,12 @@
+<!-- import_questions.html -->  
+{% extends "dashboard.html" %}
+{% block main_content %}
+<h2>Import Questions</h2>  
+<form method="post" enctype="multipart/form-data">  
+    {% csrf_token %}  
+    <label for="csv_file">Choose CSV file:</label>  
+    <input type="file" name="csv_file" id="csv_file" required>  
+    <button type="submit">Import Questions</button>  
+</form>  
+<a href="{% url 'question-list' %}">Cancel</a>
+{% endblock main_content %}

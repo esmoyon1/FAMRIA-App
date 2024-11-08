@@ -1,0 +1,40 @@
+{% extends "dashboard.html" %}
+{% comment %} {% load crispy_forms_tags %} {% endcomment %}
+{% block main_content %}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ survey.title }}</h1>
+    
+    <a href="{% url 'survey-detail' survey.id %}" type="button" class="btn btn-sm btn-outline-secondary">Survey Details</a>
+
+</div>
+    {% comment %} <h1>{{ survey.title }}</h1>    {% endcomment %}
+    <p>{{ survey.description }}</p> 
+    <h3>Questions:</h3>  
+    <form action="{% url 'survey-response' survey.id %}" method="post">  
+        {% csrf_token %}  
+        <div class="mb-3">  
+            <label for="respondent_name" class="form-label">Your Name (Optional)</label>  
+            <input type="text" class="form-control" name="respondent_name" placeholder="Anonymous">  
+        </div>  
+        <ul class="list-group">  
+            {% for sq in assigned_questions %}  
+            <li class="list-group-item">{{ sq.question.text }}</li>  
+            <div class="mb-3">  
+                {% if sq.question.question_type == 'multiple_choice' %}  
+                    <select class="form-select form-select-sm" name="{{ sq.id }}">  
+                        {% for option in sq.question.options.items %}  
+                        <option value="{{ option.0 }}">{{ option.1 }}</option>  
+                        {% endfor %}  
+                    </select>  
+                {% elif sq.question.question_type == 'text' %}  
+                    <textarea class="form-control" name="{{ sq.id }}" rows="4"></textarea>  
+                {% elif sq.question.question_type == 'rating' %}  
+                    <input class="form-control" type="number" name="{{ sq.id }}" min="1" max="5" step="1">  
+                {% endif %}  
+            </div>  
+            {% endfor %}  
+        </ul>  
+        <button class="btn btn-sm btn-outline-primary" type="submit">Submit Answers</button>  
+    </form>  
+{% endblock %}

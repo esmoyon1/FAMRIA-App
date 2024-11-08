@@ -1,0 +1,8 @@
+{% extends "dashboard.html" %}
+{% load crispy_forms_tags %}
+{% block main_content %}
+{% comment %} <h1>{% if object %}Edit{% else %}Create{% endif %} Survey</h1>   {% endcomment %}
+<h1>Survey Complete, Thank You!</h1>  
+<p>Your responses have been successfully submitted.</p>   
+<a href="{% url 'survey-list' %}" class="btn btn-secondary mt-3">Back to List</a>
+{% endblock main_content %}

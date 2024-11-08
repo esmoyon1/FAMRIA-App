@@ -1,0 +1,25 @@
+﻿sector,question_text,question_type,options,version
+physical,"FMR Code, area being studied",text,,1
+physical,Road Length and Width (based on actual measurement),text,,1
+physical,"Coordinates (4 points if square or rectangle, else get all contours)",text,,1
+physical,"List all possible - distance to market, processing areas, ports, etc",text,,1
+physical,Name of Enumerator,text,,1
+physical,Date of study,text,,1
+physical,"1. Ligtas ba ang FMR? Meron bang lugar para sa tao, sasakyan, at hayop, at may ilaw, signage, atbpa.? ",text,,1
+physical,"2. Meron bang kanal o daanan ng tubig, proteksyon sa pagguho ng lupa, at iba pang kaugnay na istruktura ang FMR?",text,,1
+physical,1. Ano ang sasakyang madalas dumaan sa FMR? ,text,,1
+physical,"2. Anong mga produkto ang madalas dumaan sa FMR, gaano kabigat, at gaano kadalas? ",text,,1
+physical,"3. Sa scale na 1-5 (5 ang pinakamataas), gaano katibay ang FMR sa tingin mo?",text,,1
+physical,1. Ilang aksidente na ang nangyari simula nang nagawa ang kalsada? Gaano kadalas itong mangyari?,text,,1
+physical,2. Tumataas ba o bumababa ang mga aksidente (kung meron) sa FMR at sa mga malapit na kalsada?,text,,1
+physical,"3. Ano ang dahilan ng mga aksidente? Halimbawa ng sagot: Bitak sa daan, disenyo ng kalsada, lokasyon, lasing na drayber. Nababahala ka ba rito?",text,,1
+physical,4. Paano naapektuhan ng FMR ang daloy ng trapiko (galaw ng mga tao at sasakyan) - bago ito gawin at pagkatapos makumpleto? ,text,,1
+physical,"1. Paano napadali ng FMR ang galaw ng mga tao, nakakunekta ba ito sa pangunahin at pangalawang kalsada? ",text,,1
+physical,2. Gaano kalaki ang natitipid na oras sa biyahe?,text,,1
+physical,3. Paano nakaapekto ang FMR sa lokal na transportasyon - mas maginhawa ba at mas ligtas ngayon? ,text,,1
+physical,"4. Direktang nakakunekta ba ang FMR sa mga lugar ng produksyon, palengke, planta, atbp.? Napadali ba ang biyahe at ginhawa sa pagpunta sa mga nasasakupan ng FMR?",text,,1
+physical,"1. Gaano kadalas ang maintenance o repair ng kalsada, at anong klase ng maintenance ang kadalasang ginagawa? ",text,,1
+physical,"2. Sa tingin mo meron bang pangangailangan pahabain ang FMR (oo o hindi)? Kung oo, ilan kilometro ang kailangan?",text,,1
+physical,3. Nagampanan ba ng FMR ang sadyang serbisyo nito?,text,,1
+physical,Notes,text,,1
+physical,Recommendations,text,,1

@@ -1,0 +1,105 @@
+
+{% extends "dashboard.html" %}
+
+{% block title %}
+<title>{{ survey.title }}</title> 
+{% endblock title %}
+{% block main_content %}
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ survey.title }}</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      {% comment %} <a href="{% url 'create-question' %}" type="button" class="btn btn-sm btn-outline-secondary">
+        Create New Question
+      </a> {% endcomment %}
+      <a href="{% url 'survey-response' survey.id %}" type="button" class="btn btn-sm btn-outline-info">Take Survey</a>
+      <a href="{% url 'survey-specific-responses' survey.id %}" type="button" class="btn btn-sm btn-outline-success">Survey Responses
+        <span class="badge text-bg-secondary">{{ response_count }}</span>
+      </a>
+      <a href="{% url 'survey-list' %}" type="button" class="btn btn-sm btn-outline-secondary">Back to Surveys</a>  
+  
+    </div>
+  </div>
+    {% comment %} <h1>{{ survey.title }}</h1>    {% endcomment %}
+    <p>{{ survey.description }}</p> 
+    <p>Number of Questions: {{ question_count }}</p>  
+    <h3>Assigned Questions</h3> 
+    <p class="text-sm-start text-info">Drag and Drop questions to re-order.</p> 
+    <ul class="list-group" id="sortable">  
+      {% for sq in assigned_questions %} 
+        {% comment %} {% for survey_question in survey.surveyquestion_set.all %}   {% endcomment %}
+        <li class="list-group-item" data-id="{{ sq.id }}">  
+          {{sq.id}} - {{ sq.question.text }}  
+          <form action="{% url 'survey-detail' survey.id %}" method="post" style="display:inline;">  
+            {% csrf_token %}  
+            <input type="hidden" name="question_id" value="{{ sq.question.id }}"> 
+            <button type="submit" class="btn btn-sm btn-outline-danger" name="remove_question">Remove</button>  
+          </form>  
+        </li>  
+      {% empty %}  
+        <li>No questions assigned.</li>  
+      {% endfor %} 
+    </ul>  
+
+<h3>Available Questions</h3>  
+<div class="row">
+  <form action="{% url 'survey-detail' survey.id %}" method="post" style="display:inline;">  
+    {% csrf_token %}  
+    <select class="form-control" name="question_id">  
+        {% for question in questions %}  
+        <option value="{{ question.id }}">{{ question.text }}</option>  
+        {% endfor %}  
+    </select>  
+    <button type="submit" class="btn btn-sm btn-outline-primary" name="add_question">Add Question</button> 
+  </form>  
+</div>
+<h3>Import Questions</h3>  
+<form action="{% url 'import-questions' survey.id %}" method="post" enctype="multipart/form-data">  
+    {% csrf_token %}  
+    <div class="mb-3">  
+        <label for="csv_file" class="form-label">Upload CSV file of questions:</label>  
+        <input type="file" class="form-control" name="csv_file" id="csv_file" required>  
+    </div>  
+    <button type="submit" class="btn btn-primary">Import Questions</button>  
+</form>  
+
+<h3>Import Answers</h3>  
+<form action="{% url 'import-responses' survey.id %}" method="post" enctype="multipart/form-data">  
+    {% csrf_token %}  
+    <div class="mb-3">  
+        <label for="csv_file" class="form-label">Upload CSV file of questions:</label>  
+        <input type="file" class="form-control" name="csv_file" id="csv_file" required>  
+    </div>  
+    <button type="submit" class="btn btn-primary">Import Answers</button>  
+</form> 
+
+<hr>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>  
+    <script>  
+        $(function() {  
+            $('#sortable').sortable({  
+                update: function(event, ui) {  
+                    var order = $('#sortable').sortable('toArray', {attribute: 'data-id'});  
+                    $.ajax({  
+                        type: 'POST',  
+                        url: '{% url "reorder-questions" survey.id %}',  
+                        data: {  
+                            'order[]': order,  
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'  
+                        },  
+                        success: function(response) {  
+                            if (response.status === 'success') {  
+                                // Optionally notify user of success  
+                                console.log('Order updated successfully!');  
+                            }  
+                        },  
+                        error: function(response) {  
+                            // Optionally notify user of error  
+                            console.error('Error updating order:', response);  
+                        }  
+                    });  
+                }  
+            });  
+        });  
+    </script>  
+    {% endblock main_content %}

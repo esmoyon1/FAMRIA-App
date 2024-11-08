@@ -1,0 +1,63 @@
+{% extends "dashboard.html" %}
+
+{% block title %}
+<title>{{ survey.title }}</title> 
+{% endblock title %}
+{% block main_content %}
+{% comment %} <h1>Responses for Survey: {{ survey.title }}</h1>  
+<table>  
+    <thead>  
+        <tr>  
+            <th>Question</th>  
+            <th>User</th>  
+            <th>Response</th>  
+        </tr>  
+    </thead>  
+    <tbody>  
+        {% for response in survey_responses %}  
+        <tr>  
+            <td>{{ response.survey_question.question.text }}</td>  
+            <td>{{ response.user.username }}</td>  
+            <td>{{ response.answer }}</td>  
+        </tr>  
+        {% empty %}  
+        <tr>  
+            <td colspan="3">No responses yet.</td>  
+        </tr>  
+        {% endfor %}  
+    </tbody>  
+</table>   {% endcomment %}
+
+{% if survey %}  
+    <h2>Responses for Survey {{ survey.title }}</h2>  
+{% else %}  
+    <h2>Survey Responses: {{ survey.title }}</h2> 
+{% endif %}  
+
+<table class="table">  
+    <thead>  
+        <tr>  
+            {% if survey %} <th>Survey</th>  {% endif %} 
+            <th>Respondent</th>  
+            <th>Date Submitted</th>  
+            <th>Actions</th>  
+        </tr>  
+    </thead>  
+    <tbody>  
+        {% for survey_response in survey_responses %}  
+        <tr>  
+            {% if survey %} <td>{{ survey_response.survey }}</td>  {% endif %} 
+            <td>{{ survey_response.respondent }}</td>  
+            <td>{{ survey_response.created_at }}</td>  
+            <td>  
+                <a href="{% url 'survey-response-detail' survey_response.id %}" class="btn btn-info btn-sm">View Details</a>  
+            </td>  
+        </tr>  
+        {% endfor %}  
+    </tbody>  
+</table>  
+
+<a href="{% url 'survey-list' %}" class="btn btn-secondary">Back to Surveys List</a> 
+
+{% comment %} <a href="{% url 'survey-detail' survey.id %}">Back to Survey Details</a>   {% endcomment %}
+{% endblock %}

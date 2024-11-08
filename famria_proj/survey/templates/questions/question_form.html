@@ -1,0 +1,12 @@
+{% extends "dashboard.html" %}
+{% load crispy_forms_tags %}
+{% block main_content %}
+    <h1>{% if form.instance.id %}Edit Question{% else %}Create Question{% endif %}</h1>  
+    <form method="post">  
+        {% csrf_token %}  
+        {{ form|crispy }}  
+        <button type="submit" class="btn btn-primary">Save</button>  
+    </form>  
+    <a href="{% url 'question-list' %}" class="btn btn-secondary mt-3">Back to List</a>  
+
+{% endblock main_content %}

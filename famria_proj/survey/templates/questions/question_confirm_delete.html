@@ -1,0 +1,12 @@
+{% extends "dashboard.html" %}
+{% block main_content %}
+{% comment %} <div class="container mt-4">   {% endcomment %}
+    <h1>Delete Question</h1>  
+    <p>Are you sure you want to delete "{{ question.text }}"?</p>  
+    <form method="post">  
+        {% csrf_token %}  
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>  
+    </form>  
+    <a href="{% url 'question_list' %}" class="btn btn-secondary mt-3">Cancel</a>  
+{% comment %} </div>   {% endcomment %}
+{% endblock main_content %}

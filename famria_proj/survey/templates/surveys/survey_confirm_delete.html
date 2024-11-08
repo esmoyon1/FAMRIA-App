@@ -1,0 +1,21 @@
+{% extends "dashboard.html" %}
+{% block main_content %}
+<div class="container mt-4"> 
+    <h1>Delete Survey</h1>  
+<p>Are you sure you want to delete the survey "{{ object.title }}"?</p>  
+<form method="post">  
+    {% csrf_token %}  
+    <button type="submit" class="btn btn-danger">Yes, Delete</button>  
+</form>  
+<a href="{% url 'survey-list' %}" class="btn btn-secondary mt-3">Cancel</a>
+
+{% comment %} 
+    <h1>Delete Question</h1>  
+    <p>Are you sure you want to delete "{{ question.text }}"?</p>  
+    <form method="post">  
+        {% csrf_token %}  
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>  
+    </form>  
+    <a href="{% url 'question_list' %}" class="btn btn-secondary mt-3">Cancel</a>   {% endcomment %}
+</div>  
+{% endblock main_content %}

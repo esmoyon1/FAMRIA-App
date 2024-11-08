@@ -1,0 +1,49 @@
+{% extends "dashboard.html" %}
+
+{% block title %}
+<title>{{ survey.title }}</title> 
+{% endblock title %}
+{% block main_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Survey Response Details</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <a href="{% url 'survey-list' %}" type="button" class="btn btn-sm btn-outline-secondary">Back to Surveys</a>  
+      <a href="{% url 'survey-responses' %}" type="button" class="btn btn-sm btn-outline-success">Survey Responses
+        <span class="badge text-bg-secondary">{{ responses_count }}</span>
+      </a>
+    </div>
+  </div>
+  <h5>{{ s.survey.title }}</h5>  
+  <p>{{ s.survey.description }}</p>
+    <div class="response-info">   
+        <h5>Survey: {{ survey_response.survey.title }}</h5>  
+        <p>Respondent: {{ survey_response.respondent }}</p>  
+        <p>Date Submitted: {{ survey_response.created_at }}</p> 
+    </div>  
+
+    <h5>Survey Responses</h5>  
+    <table class="table">  
+        <thead>  
+            <tr>  
+                <th>Question</th>  
+                <th>Answer</th>  
+            </tr>  
+        </thead>  
+        <tbody>  
+            {% for answer in survey_response.answers.all %}  
+            <tr>  
+                <td>{{ answer.survey_question.question }}</td>  
+                <td>{{ answer.answer }}</td>  
+            </tr>  
+            {% empty %}  
+            <tr>  
+                <td colspan="2">No answers found for this response.</td>  
+            </tr>  
+            {% endfor %}  
+        </tbody>  
+    </table>  
+
+    <a href="{% url 'survey-list' %}" class="btn btn-secondary">Back to Surveys List</a>  
+    <a href="{% url 'survey-specific-responses' survey_response.survey.id %}" class="btn btn-secondary">Back to Survey Responses</a>  
+
+{% endblock %}
