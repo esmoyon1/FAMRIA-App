@@ -9,9 +9,10 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+# https://www.kowe.io/guide/how-to-deploy-your-django-app-on-vercel-with-a-supabase-postgresql-twist
 import os
 from pathlib import Path
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,9 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-elo#51_$*lmvln8&$b7dh9kth5$we-fblhd_a+zfzz+(8f^x#z'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['.vercel.app', '.now.sh', '127.0.0.1']
+SECRET_KEY = os.environ.get('SECRET_KEY', SECRET_KEY)
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1').split(",")
+# ALLOWED_HOSTS = ['.vercel.app', '.now.sh', '127.0.0.1']
+SUPABASE_DB_URL = os.environ.get("SUPABASE_DB_URL")
+DJANGO_ENV = os.environ.get('DJANGO_ENV')
 
 
 # Application definition
@@ -79,23 +83,38 @@ WSGI_APPLICATION = 'famria_proj.wsgi.app'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
+# Check if the Supabase database URL is set
+if SUPABASE_DB_URL:
+    # Use the Supabase database configuration
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=SUPABASE_DB_URL, conn_max_age=600
+        )
+    }
+else:
+    # Use the SQLite database configuration for development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres', #'famriaDB',
-        'USER': 'postgres.pwvygejuujucebmidkqz', #'postgres',
-        'PASSWORD': '21lfRvEjTAuHOvaM',#'password',
-        'HOST': 'aws-0-ap-southeast-1.pooler.supabase.com', #'localhost',
-        'PORT': '6543', #'5432',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres', #'famriaDB',
+#         'USER': 'postgres.pwvygejuujucebmidkqz', #'postgres',
+#         'PASSWORD': '21lfRvEjTAuHOvaM',#'password',
+#         'HOST': 'aws-0-ap-southeast-1.pooler.supabase.com', #'localhost',
+#         'PORT': '6543', #'5432',
+#     }
+# }
 
 
 # Password validation
@@ -128,13 +147,17 @@ USE_I18N = True
 
 USE_TZ = True
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # STATICFILES_DIRS = [BASE_DIR/'static',]
-STATIC_ROOT = BASE_DIR/'staticfiles'
+# STATIC_ROOT = BASE_DIR/'staticfiles'
 # Define the directory where static files will be collected
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
