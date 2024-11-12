@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'whitenoise.runserver_nostatic',
     'survey',
     'mptt',
     'crispy_forms',
@@ -52,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = 'famria_proj.urls'
@@ -72,8 +74,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'famria_proj.wsgi.application'
-
+# WSGI_APPLICATION = 'famria_proj.wsgi.application'
+WSGI_APPLICATION = 'famria_proj.wsgi.app'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -87,11 +89,11 @@ WSGI_APPLICATION = 'famria_proj.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'famriaDB',
-        'USER': 'postgres',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': 'postgres', #'famriaDB',
+        'USER': 'postgres.pwvygejuujucebmidkqz', #'postgres',
+        'PASSWORD': '21lfRvEjTAuHOvaM',#'password',
+        'HOST': 'aws-0-ap-southeast-1.pooler.supabase.com', #'localhost',
+        'PORT': '6543', #'5432',
     }
 }
 
