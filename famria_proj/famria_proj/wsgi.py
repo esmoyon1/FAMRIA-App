@@ -15,3 +15,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'famria_proj.settings')
 
 application = get_wsgi_application()
 app = application
+# if os.environ.get('DJANGO_ENV') == 'production':
+#     app = get_wsgi_application()
+# else:
+#     application = get_wsgi_application()
