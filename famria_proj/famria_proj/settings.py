@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-elo#51_$*lmvln8&$b7dh9kth5$we-fblhd_a+zfzz+(8f^x#z
 # SECURITY WARNING: don't run with debug turned on in production!
 SECRET_KEY = os.environ.get('SECRET_KEY', SECRET_KEY)
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1').split(",")
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1', 'famria-dz125ibvi-esmuyon1s-projects.vercel.app').split(",")
 # ALLOWED_HOSTS = ['.vercel.app', '.now.sh', '127.0.0.1']
 SUPABASE_DB_URL = os.environ.get("SUPABASE_DB_URL")
 DJANGO_ENV = os.environ.get('DJANGO_ENV')
