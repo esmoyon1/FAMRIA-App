@@ -23,12 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-elo#51_$*lmvln8&$b7dh9kth5$we-fblhd_a+zfzz+(8f^x#z'
-
+# The Secret Key randomly generated: so#w%_^n-46fj(hqis7(u(5f1jsnifz+&i_)xp_8!xse!1m%+h
+# ALLOWED_HOSTS = ['127.0.0.1','famria-app.vercel.app','famria-hsiq9cbuo-esmoyon1s-projects.vercel.app']
 # SECURITY WARNING: don't run with debug turned on in production!
 SECRET_KEY = os.environ.get('SECRET_KEY', SECRET_KEY)
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1').split(",") #, 'famria-dz125ibvi-esmuyon1s-projects.vercel.app'
-# ALLOWED_HOSTS = ['.vercel.app', '.now.sh', '127.0.0.1']
+# ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', ALLOWED_HOSTS).split(",") #, 'famria-dz125ibvi-esmuyon1s-projects.vercel.app'
+ALLOWED_HOSTS = ['.vercel.app', '.now.sh', '127.0.0.1']
 SUPABASE_DB_URL = os.environ.get("SUPABASE_DB_URL")
 DJANGO_ENV = os.environ.get('DJANGO_ENV')
 
