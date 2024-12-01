@@ -26,7 +26,14 @@ from crispy_forms.layout import Submit
 #         self.helper.add_input(Submit('submit', 'Save'))  
 
 from django import forms  
-from .models import Survey, Question, Response  
+from .models import * #Survey, Question, Response  
+
+class UserProfileForm(forms.ModelForm):  
+    first_name = forms.CharField(max_length=30, required=True)  
+    last_name = forms.CharField(max_length=30, required=True)
+    class Meta:  
+        model = UserProfile  
+        fields = ['bio', 'phone_number', 'location']  
 
 class SurveyForm(forms.ModelForm):  
     class Meta:  

@@ -27,4 +27,10 @@ urlpatterns = [
     path('questions/update/<int:question_id>/', update_question, name='update-question'),  # Update a question  
     path('questions/delete/<int:question_id>/', delete_question, name='delete-question'),  # Delete a question  
 
+    path('users/', users_list, name='users-list'),  
+    path('register/', register, name='register'),  
+    path('profile/', profile, name='profile'),  
+    path('profile/edit/', edit_profile, name='edit_profile'),  
+    path('accounts/login/', user_login, name='login'),  
+    path('logout/', user_logout, name='logout'), 
 ]  

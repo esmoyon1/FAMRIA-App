@@ -1,0 +1,54 @@
+{% extends "dashboard.html" %}
+{% comment %} {% load crispy_forms_tags %} {% endcomment %}
+{% block main_content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">App Users</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          {% comment %} <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+          </div> {% endcomment %}
+          {% comment %} <a href="{% url 'create-question' %}" type="button" class="btn btn-sm btn-outline-secondary"> {% endcomment %}
+            {% comment %} <svg class="bi"><use xlink:href="#calendar3"/></svg> {% endcomment %}
+            {% comment %} Create New Question {% endcomment %}
+          {% comment %} </a> {% endcomment %}
+          {% comment %} <a href="{% url 'question-import' %}" type="button" class="btn btn-sm btn-outline-primary">Import Questions</a>   {% endcomment %}
+        </div>
+      </div>
+ 
+      <table id="example" class="table table-striped table-sm" style="width:100%">
+        <thead>  
+            <tr>  
+                <th>ID</th>  
+                <th>Username</th>  
+                <th>Name</th>  
+                <th>Active</th>  
+                <th>Date Joined</th>  
+                <th>Last Login</th>  
+                <th>Actions</th>  
+            </tr>  
+        </thead>  
+        <tbody>  
+            {% for u in users %}
+                <tr>  
+                    <td>{{ u.id }}</td> 
+                    <td>{{ u.user.username }}</td>  
+                    <td>{{ u.get_full_name }}</td>  
+                    <td>{{ u.user.is_active }}</td>  
+                    <td>{{ u.user.date_joined }}</td>  
+                    <td>{{ u.user.last_login }}</td>  
+                    <td>  
+                        <div class="btn-group" role="group" aria-label="Basic outlined example">
+                            <a href="{% url 'update-question' u.id %}" type="button" class="btn btn-sm btn-outline-warning">Edit</a>  
+                            <form action="{% url 'delete-question' u.id %}" method="post" style="display:inline;">  
+                                {% csrf_token %}  
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>  
+                            </form>  
+                        </div>
+                    </td>  
+                </tr>  
+            {% endfor %}  
+        </tbody>  
+    </table>  
+{% endblock main_content %}
