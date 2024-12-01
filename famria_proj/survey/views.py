@@ -1,18 +1,94 @@
 from django.shortcuts import render, redirect, get_object_or_404  
 from django.contrib.auth.decorators import login_required
-from .models import Survey, Question, Response, SurveyQuestion, SurveyResponse
-from .forms import QuestionForm, SurveyForm
+from django.contrib.auth import login, authenticate, logout  
 from django.contrib import messages
-from django.db.models import Count  
+from django.contrib.auth.forms import UserCreationForm
 from django.views import View  
-from django.core.files.storage import FileSystemStorage  
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
-import csv  
-import json  
-from django.core.exceptions import ValidationError 
 from django.views.decorators.http import require_POST  
+from django.core.files.storage import FileSystemStorage  
+from django.core.exceptions import ValidationError 
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.db.models import Count  
+import csv, json  
+from .models import * #Survey, Question, Response, SurveyQuestion, SurveyResponse
+from .forms import * #QuestionForm, SurveyForm
 
 # Create your views here.
+
+def register(request):  
+    if request.method == 'POST':  
+        form = UserCreationForm(request.POST)  
+        if form.is_valid():  
+            user = form.save()  
+            
+            # Create a UserProfile only if it doesn't already exist  
+            if not UserProfile.objects.filter(user=user).exists():  
+                UserProfile.objects.create(user=user)  # Create a profile for the user  
+
+            login(request, user)  # Automatically log in the user after registration  
+            
+            messages.success(request, 'Registration successful! Please complete your profile.')  
+            return redirect('edit_profile')  # Send to edit profile    
+    else:  
+        form = UserCreationForm()  
+    return render(request, 'user/register.html', {'form': form})  
+
+@login_required  
+def profile(request):  
+    user_profile = get_object_or_404(UserProfile, user=request.user)  
+    return render(request, 'user/profile.html', {'profile': user_profile})  
+
+@login_required  
+def edit_profile(request):  
+    user_profile = get_object_or_404(UserProfile, user=request.user)  
+    if request.method == 'POST':  
+        user_form = UserProfileForm(request.POST, request.FILES, instance=user_profile)  
+        if user_form.is_valid():  
+            # Save the User info (first_name, last_name)  
+            request.user.first_name = user_form.cleaned_data.get('first_name')  
+            request.user.last_name = user_form.cleaned_data.get('last_name')  
+            request.user.save()  
+            # Save the User Profile info (bio, phone_number, location)  
+            user_profile.bio = user_form.cleaned_data.get('bio')  
+            user_profile.phone_number = user_form.cleaned_data.get('phone_number')  
+            user_profile.location = user_form.cleaned_data.get('location')  
+            user_profile.save()  
+            
+            messages.success(request, 'Profile updated successfully!')  
+            return redirect('profile')  # Redirect to the profile page after saving  
+    else:  
+        user_form = UserProfileForm(initial={  
+            'bio': user_profile.bio,  
+            'phone_number': user_profile.phone_number,  
+            'location': user_profile.location,  
+            'first_name': request.user.first_name,  
+            'last_name': request.user.last_name,  
+        })  
+  
+    return render(request, 'user/edit_profile.html', {'form': user_form})  
+
+def user_login(request):  
+    if request.method == 'POST':  
+        username = request.POST['username']  
+        password = request.POST['password']  
+        user = authenticate(request, username=username, password=password)  
+        if user is not None:  
+            login(request, user)  
+            return redirect('profile')  # Redirect to the profile page  
+        else:  
+            # Invalid login  
+            return render(request, 'user/login.html', {'error': 'Invalid credentials'})  
+    return render(request, 'user/login.html')  
+
+def user_logout(request):  
+    logout(request)  
+    return redirect('login')  # Redirect to the login page 
+
+def users_list(request):  
+    users = UserProfile.objects.all() 
+     
+    return render(request, 'user/users_list.html', {"users": users})  
+    # return render(request, 'surveys/survey_list.html', {'surveys': surveys})
 
 def dashboard(request):  
     return render(request, 'dashboard.html')  
@@ -41,7 +117,8 @@ def survey_list(request):
     return render(request, 'surveys/survey_list.html', {'survey_data': survey_data, 'responses_count': responses_count})  
     # return render(request, 'surveys/survey_list.html', {'surveys': surveys})
 
-# Create a new survey  
+# Create a new survey 
+@login_required   
 def survey_create(request):  
     if request.method == 'POST':  
         form = SurveyForm(request.POST)  
@@ -53,6 +130,7 @@ def survey_create(request):
         form = SurveyForm()  
     return render(request, 'surveys/survey_form.html', {'form': form})  
 
+@login_required  
 def survey_detail(request, survey_id):  
     survey = get_object_or_404(Survey, id=survey_id)  
         
@@ -117,27 +195,7 @@ def survey_response(request, survey_id):
         'assigned_questions': assigned_questions,  
     })  
 
-def OLD_survey_response(request, survey_id):  
-    survey = get_object_or_404(Survey, id=survey_id)  
-    assigned_questions = survey.surveyquestion_set.all()  
-
-    if request.method == "POST":  
-        for sq in assigned_questions:  
-            answer = request.POST.get(str(sq.id))  
-            if answer:  
-                Response.objects.create(  
-                    survey_question=sq,  
-                    # user=request.user,  
-                    answer=answer  
-                ) 
-        # SurveyResponse.objects.create() 
-        return redirect('survey-thanks')  # Redirect to thank you page or result page  
-
-    return render(request, 'surveys/survey_response_form.html', {  
-        'survey': survey,  
-        'assigned_questions': assigned_questions,  
-    })
-
+@login_required  
 def survey_responses(request, survey_id=None):  
     # Get all SurveyResponse instances or filter by the specific survey  
     if survey_id:  
@@ -152,26 +210,18 @@ def survey_responses(request, survey_id=None):
         'survey': survey,  
     })  
 
-    
+@login_required  
 def survey_response_detail(request, id):  
     survey_response = get_object_or_404(SurveyResponse, id=id)  
     return render(request, 'surveys/survey_response_detail.html', {  
         'survey_response': survey_response,  
     })   
 
-def oldsurvey_responses(request, survey_id):  
-    survey = get_object_or_404(Survey, id=survey_id)  
-    responses = SurveyResponse.objects.filter(survey_question__survey=survey).select_related('survey_question')  
-
-    return render(request, 'surveys/survey_responses.html', {  
-        'survey': survey,  
-        'responses': responses,  
-    })  
-
 def survey_thanks(request):  
     return render(request, 'surveys/survey_thanks.html')  
 
 # Update an existing question  
+@login_required  
 def survey_update(request, survey_id):  
     survey = get_object_or_404(Survey, id=survey_id)  
     if request.method == 'POST':  
@@ -185,6 +235,7 @@ def survey_update(request, survey_id):
     return render(request, 'surveys/survey_form.html', {'form': form})  
 
 # Delete a Survey  
+@login_required  
 def survey_delete(request, survey_id):  
     survey = get_object_or_404(Survey, id=survey_id)  
     if request.method == 'POST':  
@@ -193,7 +244,7 @@ def survey_delete(request, survey_id):
         return redirect('survey-list')  
     return render(request, 'surveys/survey_confirm_delete.html', {'survey': survey})
 
-@require_POST  
+@require_POST
 def reorder_questions(request, survey_id):  
     order = request.POST.getlist('order[]')  # This will give you an ordered list of the question IDs  
     
@@ -252,6 +303,7 @@ def import_questions(request, survey_id):
 
     return HttpResponseBadRequest("Invalid request method.", status=400)
 
+@login_required  
 def import_responses(request, survey_id):  
     survey = get_object_or_404(Survey, id=survey_id)  
 
@@ -298,48 +350,8 @@ def import_responses(request, survey_id):
 
     return HttpResponseBadRequest("Invalid request method.", status=400)
 
-def Oldimport_responses(request, survey_id):  
-    survey = get_object_or_404(Survey, id=survey_id)  
-
-    if request.method == 'POST' and request.FILES['csv_file']:  
-        csv_file = request.FILES['csv_file']  
-        decoded_file = csv_file.read().decode('utf-8-sig').splitlines()  
-        reader = csv.DictReader(decoded_file)  
-
-        for row in reader:  
-            respondent_name = row['respondent']  
-            survey_question_id = row['survey_question_id']  
-            answer = row['answer']  
-
-            # Create or get the SurveyResponse  
-            survey_response, created = SurveyResponse.objects.get_or_create(  
-                survey=survey,  
-                respondent=respondent_name  
-            )  
-
-            try:  
-                # Get the SurveyQuestion using the provided ID  
-                survey_question = get_object_or_404(SurveyQuestion, id=survey_question_id, survey=survey)  
-
-                # Create the Response  
-                response = Response(  
-                    survey_question=survey_question,  
-                    respondent=survey_response,  
-                    answer=answer  
-                )  
-                response.clean()  # Call the clean method to validate the response  
-                response.save()  # Save the response to the database  
-
-            except ValidationError as e:  
-                return HttpResponseBadRequest(f"Validation error for respondent '{respondent_name}': {str(e)}")  
-            except Exception as e:  
-                return HttpResponseBadRequest(f"An error occurred: {str(e)}")  
-
-        return redirect('survey-detail', survey_id=survey.id)  
-
-    return HttpResponseBadRequest("Invalid request method.", status=400) 
-
 # Create a new question  
+@login_required  
 def create_question(request):  
     if request.method == 'POST':  
         form = QuestionForm(request.POST)  
@@ -350,7 +362,7 @@ def create_question(request):
     else:  
         form = QuestionForm()  
     return render(request, 'questions/question_form.html', {'form': form})  
-
+ 
 class QuestionImportView(View):  
     def get(self, request):  
         return render(request, 'questions/import_questions.html')  
@@ -411,11 +423,13 @@ class QuestionImportView(View):
         return render(request, 'questions/import_questions.html')  
 
 # Read (list) all questions  
+@login_required  
 def question_list(request):  
     questions = Question.objects.all().order_by('id')  
     return render(request, 'questions/question_list.html', {'questions': questions})  
 
 # Update an existing question  
+@login_required  
 def update_question(request, question_id):  
     question = get_object_or_404(Question, id=question_id)  
     if request.method == 'POST':  
@@ -429,6 +443,7 @@ def update_question(request, question_id):
     return render(request, 'questions/question_form.html', {'form': form})  
 
 # Delete a question  
+@login_required  
 def delete_question(request, question_id):  
     question = get_object_or_404(Question, id=question_id)  
     if request.method == 'POST':  

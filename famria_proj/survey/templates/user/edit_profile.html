@@ -1,0 +1,26 @@
+{% extends "dashboard.html" %}
+{% load crispy_forms_tags %}
+{% block main_content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Edit Profile</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          {% comment %} <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+          </div> {% endcomment %}
+          {% comment %} <a href="{% url 'create-question' %}" type="button" class="btn btn-sm btn-outline-secondary"> {% endcomment %}
+            {% comment %} <svg class="bi"><use xlink:href="#calendar3"/></svg> {% endcomment %}
+            {% comment %} Create New Question {% endcomment %}
+          {% comment %} </a> {% endcomment %}
+          {% comment %} <a href="{% url 'question-import' %}" type="button" class="btn btn-sm btn-outline-primary">Import Questions</a>   {% endcomment %}
+        </div>
+      </div>
+ 
+      <form method="post" enctype="multipart/form-data">  
+        {% csrf_token %}  
+        {{ form|crispy }}  
+        <button type="submit">Save Changes</button>  
+    </form>  
+    <a href="{% url 'profile' %}">Cancel</a> 
+{% endblock main_content %}
