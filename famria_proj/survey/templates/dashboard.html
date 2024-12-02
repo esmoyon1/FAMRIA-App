@@ -491,13 +491,13 @@
         {% endfor %}  
     ];  
 
-    const cornData = [  
+    const questionsData = [  
         {% for s in survey_data %}  
             {{ s.question_count }}{% if not forloop.last %}, {% endif %}  
         {% endfor %}  
     ];  
 
-    const wheatData = [  
+    const responseData = [  
         {% for s in survey_data %}  
             {{ s.response_count }}{% if not forloop.last %}, {% endif %}  
         {% endfor %}  
@@ -507,7 +507,7 @@
        type: 'column'
    },
    title: {
-       text: 'Corn vs wheat estimated production for 2023',
+       text: 'Active Survey Questions and Responses',
        align: 'left'
    },
    subtitle: {
@@ -520,13 +520,13 @@
        categories: categories, // ['USA', 'China', 'Brazil', 'EU', 'Argentina', 'India'],
        crosshair: true,
        accessibility: {
-           description: 'Countries'
+           description: 'Surveys'
        }
    },
    yAxis: {
        min: 0,
        title: {
-           text: '1000 metric tons (MT)'
+           text: 'Count'
        }
    },
    tooltip: {
@@ -540,12 +540,12 @@
    },
    series: [
        {
-           name: 'Corn',
-           data: cornData, //[387749, 280000, 129000, 64300, 54000, 34300]
+           name: 'Questions',
+           data: questionsData, //[387749, 280000, 129000, 64300, 54000, 34300]
        },
        {
-           name: 'Wheat',
-           data: wheatData,  //[45321, 140000, 10000, 140500, 19500, 113500]
+           name: 'Responses',
+           data: responseData,  //[45321, 140000, 10000, 140500, 19500, 113500]
        }
    ]
 });
