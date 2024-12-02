@@ -94,22 +94,22 @@ if SUPABASE_DB_URL:
     }
 else:
     # Use the SQLite database configuration for development
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    } 
     # DATABASES = {
     #     'default': {
-    #         'ENGINE': 'django.db.backends.postgresql',
-    #         'NAME': 'famriaDB',#'postgres', #
-    #         'USER': 'postgres',#'postgres.pwvygejuujucebmidkqz', #
-    #         'PASSWORD': 'password',#'21lfRvEjTAuHOvaM',#
-    #         'HOST': 'localhost',#'aws-0-ap-southeast-1.pooler.supabase.com', #
-    #         'PORT': '5432',#'6543', #
+    #         'ENGINE': 'django.db.backends.sqlite3',
+    #         'NAME': BASE_DIR / 'db.sqlite3',
     #     }
-    # }
+    # } 
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'famriaDB',#'postgres', #
+            'USER': 'postgres',#'postgres.pwvygejuujucebmidkqz', #
+            'PASSWORD': 'password',#'21lfRvEjTAuHOvaM',#
+            'HOST': 'localhost',#'aws-0-ap-southeast-1.pooler.supabase.com', #
+            'PORT': '5432',#'6543', #
+        }
+    }
     #use this if there are migrations that need to be applied to the production database.
 # DATABASES = {
 #     'default': {
