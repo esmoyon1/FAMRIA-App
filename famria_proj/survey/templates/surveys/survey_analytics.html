@@ -1,0 +1,40 @@
+{% extends "dashboard.html" %}
+{% load crispy_forms_tags %}
+{% block main_content %}
+{% comment %} <h1>{% if object %}Edit{% else %}Create{% endif %} Survey</h1>   {% endcomment %}
+<h1>{{ survey.title }}</h1>  
+<p>{{ survey.description }}</p>  
+<h2>Survey Analytics</h2>  
+<p>Total Responses: {{ analytics_data.total_responses }}</p>  
+
+<table>  
+    <thead>  
+        <tr>  
+            <th>Question</th>  
+            <th>Responses</th>  
+            <th>Response Count</th>  
+        </tr>  
+    </thead>  
+    <tbody>  
+        {% for question in analytics_data.questions %}  
+        <tr>  
+            <td>{{ question.question }}</td>  
+            <td>  
+                <ul>  
+                    {% for answer, count in question.responses.items %}  
+                    <li>{{ answer }}: {{ count }} responses</li>  
+                    {% endfor %}  
+                </ul>  
+            </td>  
+            <td>{{ question.response_count }}</td>  
+        </tr>  
+        {% empty %}  
+        <tr>  
+            <td colspan="3">No questions available for this survey.</td>  
+        </tr>  
+        {% endfor %}  
+    </tbody>  
+</table>  
+
+<a href="{% url 'survey-list' %}">Back to Surveys</a>  
+{% endblock main_content %}
