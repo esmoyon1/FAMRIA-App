@@ -91,7 +91,28 @@ def users_list(request):
     # return render(request, 'surveys/survey_list.html', {'surveys': surveys})
 
 def dashboard(request):  
-    return render(request, 'dashboard.html')  
+    
+    surveys = Survey.objects.all()  
+    # Prepare a list to hold survey data along with question and response counts  
+    survey_data = []  
+    
+    responses_count = SurveyResponse.objects.count() 
+    for survey in surveys:  
+        # Count the number of questions associated with the survey  
+        question_count = survey.surveyquestion_set.count()  
+        
+        # Count the number of responses related to the questions in this survey  
+        response_count = survey.count_responses() 
+        
+        survey_data.append({  
+            'survey': survey,  
+            'question_count': question_count,  
+            'response_count': response_count,  
+        }) 
+    
+    return render(request, 'dashboard.html', {'survey_data': survey_data, 'responses_count': responses_count})  
+    
+    # return render(request, 'dashboard.html')  
 
 def survey_list(request):  
     surveys = Survey.objects.all()  
