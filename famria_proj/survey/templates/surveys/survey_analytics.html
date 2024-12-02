@@ -8,7 +8,7 @@
 <p>Total Responses: {{ analytics_data.total_responses }}</p>  
 
     <!-- Filter Form -->  
-    <form method="get">  
+    {% comment %} <form method="get">  
         <label for="question">Filter by Question:</label>  
         <select name="question" id="question" onchange="this.form.submit()">  
             <option value="">-- Select a Question --</option>  
@@ -16,12 +16,12 @@
                 <option value="{{ question.id }}" {% if selected_question == question.id %} selected {% endif %}>
                     {{ question.question.text }}  
                 </option>  
-            {% endfor %}  
+            {% endfor %}    
         </select>  
         <input type="submit" value="Filter">  
     </form>  
 
-    <p>Selected Question: {{ selected_question.text }}</p>  
+    <p>Selected Question: {{ selected_question.text }}</p>   {% endcomment %}
 <table>  
     <thead>  
         <tr>  
