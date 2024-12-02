@@ -39,7 +39,7 @@ class UserProfileForm(forms.ModelForm):
 class SurveyForm(forms.ModelForm):  
     class Meta:  
         model = Survey  
-        fields = ['title', 'description']  
+        fields = ['title', 'description', 'status']  
 
 class QuestionForm(forms.ModelForm):  
     class Meta:  

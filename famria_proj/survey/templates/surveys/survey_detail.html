@@ -11,7 +11,7 @@
       {% comment %} <a href="{% url 'create-question' %}" type="button" class="btn btn-sm btn-outline-secondary">
         Create New Question
       </a> {% endcomment %}
-      <a href="{% url 'survey-response' survey.id %}" type="button" class="btn btn-sm btn-outline-info">Take Survey</a>
+      <a href="{% url 'survey-response' survey.id %}" type="button" class="btn btn-sm btn-outline-info {% if not survey.status %}disabled{% endif %}">Take Survey</a>
       <a href="{% url 'survey-specific-responses' survey.id %}" type="button" class="btn btn-sm btn-outline-success">Survey Responses
         <span class="badge text-bg-secondary">{{ response_count }}</span>
       </a>
