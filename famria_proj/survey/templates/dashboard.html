@@ -258,18 +258,23 @@
                 Dashboard
               </a>
             </li> {% endcomment %}
+            
+            {% if user.is_authenticated %} 
             <li class="nav-item">
               <a class="nav-link d-flex align-items-center gap-2" href="{% url 'question-list' %}">
                 <svg class="bi"><use xlink:href="#file-earmark"/></svg>
                 Question Management
               </a>
             </li>
+            {% endif %}
             <li class="nav-item">
               <a class="nav-link d-flex align-items-center gap-2" href="{% url 'survey-list' %}">
                 <svg class="bi"><use xlink:href="#cart"/></svg>
                 Surveys
               </a>
             </li>
+            
+            {% if user.is_authenticated %} 
             <li class="nav-item">
               <a class="nav-link d-flex align-items-center gap-2" href="{% url 'users-list' %}">
                 <svg class="bi"><use xlink:href="#people"/></svg>
@@ -282,6 +287,7 @@
                 Reports
               </a>
             </li>
+            {% endif %}
             {% comment %} <li class="nav-item">
               <a class="nav-link d-flex align-items-center gap-2" href="#">
                 <svg class="bi"><use xlink:href="#puzzle"/></svg>
@@ -305,12 +311,23 @@
                 Register
               </a>
             </li>
+            
+            {% if user.is_authenticated %} 
             <li class="nav-item">
               <a class="nav-link d-flex align-items-center gap-2" href="{% url 'logout' %}">
                 <svg class="bi"><use xlink:href="#door-closed"/></svg>
                 Sign out
               </a>
             </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link d-flex align-items-center gap-2" href="{% url 'login' %}">
+                <svg class="bi"><use xlink:href="#door-closed"/></svg>
+                Login
+              </a>
+            </li>
+
+            {% endif %}
           </ul>
         </div>
       </div>
@@ -512,8 +529,8 @@
    },
    subtitle: {
        text:
-           'Source: <a target="_blank" ' +
-           'href="https://www.indexmundi.com/agriculture/?commodity=corn">indexmundi</a>',
+           'Source: <a target="_blank" href="https://www.indexmundi.com/agriculture/?commodity=corn">.</a>',
+           
        align: 'left'
    },
    xAxis: {

@@ -220,6 +220,42 @@ def survey_response_detail(request, id):
 def survey_thanks(request):  
     return render(request, 'surveys/survey_thanks.html')  
 
+def survey_analytics(request, survey_id):  
+    survey = get_object_or_404(Survey, id=survey_id)  
+    
+    # Get all responses for the survey  
+    responses = SurveyResponse.objects.filter(survey=survey)  
+    
+    # Prepare analytics data  
+    analytics_data = {  
+        'total_responses': responses.count(),  
+        'questions': []  
+    }  
+    
+    for survey_question in survey.surveyquestion_set.all():  
+        question_data = {  
+            'question': survey_question.question.text,  
+            'responses': {},  
+            'response_count': 0  
+        }  
+        
+        # Gather responses for each question  
+        for response in responses:  
+            try:  
+                answer = Response.objects.get(survey_question=survey_question, respondent=response)  
+                question_data['responses'][answer.answer] = question_data['responses'].get(answer.answer, 0) + 1  
+                question_data['response_count'] += 1  
+            except Response.DoesNotExist:  
+                continue  
+        
+        analytics_data['questions'].append(question_data)  
+
+    context = {  
+        'survey': survey,  
+        'analytics_data': analytics_data,  
+    }  
+    return render(request, 'surveys/survey_analytics.html', context)  
+
 # Update an existing question  
 @login_required  
 def survey_update(request, survey_id):  

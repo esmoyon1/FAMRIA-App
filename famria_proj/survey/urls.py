@@ -3,12 +3,13 @@ from .views import *
 from . import views
 
 urlpatterns = [  
-    path('', survey_list, name='dashboard'),  # Set dashboard as the landing page 
+    path('', dashboard, name='dashboard'),  # Set dashboard as the landing page 
     path('surveys/', survey_list, name='survey-list'),  # Survey list URL 
     path('surveys/create/', survey_create, name='survey-create'),  # Create a question  
     path('surveys/<int:survey_id>/', survey_detail, name='survey-detail'),  # Survey detail URL 
     path('survey/<int:survey_id>/answer/', survey_response, name='survey-response'),  # Answer the questions in the survey
     path('survey/thanks/', survey_thanks, name='survey-thanks'),  # Surevy Complete Page
+    path('survey/<int:survey_id>/analytics/', survey_analytics, name='survey-analytics'),  # Surevy Complete Page
     # path('survey/<int:survey_id>/responses/', survey_responses, name='survey-responses'),
     
     path('surveys/responses/', survey_responses, name='survey-responses'),  
