@@ -172,23 +172,43 @@ def survey_response(request, survey_id):
     assigned_questions = survey.surveyquestion_set.all()  
 
     if request.method == "POST":  
-        # Get respondent's name, default to 'Anonymous' if not provided  
         respondent_name = request.POST.get('respondent_name', 'Anonymous')  
-        if assigned_questions:
-            # Create and save SurveyResponse instance  
+        if assigned_questions:  
             survey_response = SurveyResponse.objects.create(survey=survey, respondent=respondent_name)  
-
-        # Iterate over assigned questions and save individual responses  
-        for sq in assigned_questions:  
-            answer = request.POST.get(str(sq.id))  
-            if answer:  
-                Response.objects.create(  
-                    survey_question=sq,  
-                    respondent=survey_response,  # Link to the SurveyResponse instance  
-                    answer=answer  
-                )   
+            for sq in assigned_questions:  
+                answer = request.POST.getlist(str(sq.id))  # Use getlist for multi-select  
+                if answer:  
+                    # Join answers if they are multiple choices  
+                    for ans in answer:  
+                        Response.objects.create(  
+                            survey_question=sq,  
+                            respondent=survey_response,  
+                            answer=ans  
+                        )  
         
-        return redirect('survey-thanks')  # Redirect to a thank you page or result page  
+        return redirect('survey-thanks')    # Redirect to a thank you page or result page  
+
+    # Prepare questions and load options  
+    for sq in assigned_questions:  
+        # Parse the options from JSON  
+        options = sq.question.options  # Get the options field directly  
+        if options:  # Ensure options is not None or empty  
+            try:  
+                # Attempt to load the JSON; try to clean string if necessary  
+                if isinstance(options, str):  # Check if it's stored as a string  
+                    options = json.loads(options)  # Try to parse it as JSON  
+                
+                # If options is still a string after parsing, attempt to parse it again  
+                if isinstance(options, str):  
+                    options = json.loads(options.replace("\\\"", "\""))  # Clean up escaped quotes  
+
+            except (json.JSONDecodeError, TypeError) as e:  
+                options = []  # Set to an empty list if there's an error  
+
+        else:  
+            options = []  # If options is null, set to an empty list  
+        
+        sq.question.options = options  # Update question object with valid options      
 
     return render(request, 'surveys/survey_response_form.html', {  
         'survey': survey,  
@@ -226,6 +246,17 @@ def survey_analytics(request, survey_id):
     # Get all responses for the survey  
     responses = SurveyResponse.objects.filter(survey=survey)  
     
+    # Get all questions for this survey  
+    survey_questions = SurveyQuestion.objects.filter(survey=survey)  
+
+    # Initialize filtering variable  
+    selected_question = request.GET.get('question')  
+    print(selected_question)
+    if selected_question:  
+        # Filter responses based on selected question  
+        responses = responses.filter(answers__survey_question__id=selected_question)  
+    
+    print(responses)
     # Prepare analytics data  
     analytics_data = {  
         'total_responses': responses.count(),  
@@ -253,6 +284,8 @@ def survey_analytics(request, survey_id):
     context = {  
         'survey': survey,  
         'analytics_data': analytics_data,  
+        'survey_questions': survey_questions,  
+        'selected_question': selected_question,  
     }  
     return render(request, 'surveys/survey_analytics.html', context)  
 
@@ -472,7 +505,7 @@ def update_question(request, question_id):
         form = QuestionForm(request.POST, instance=question)  
         if form.is_valid():  
             form.save()  
-            messages.success(request, 'Question updated successfully!')
+            messages.success(request, 'Question updated successfully!')  
             return redirect('question-list')  
     else:  
         form = QuestionForm(instance=question)  

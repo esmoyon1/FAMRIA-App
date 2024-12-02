@@ -23,14 +23,21 @@
             <div class="mb-3">  
                 {% if sq.question.question_type == 'multiple_choice' %}  
                     <select class="form-select form-select-sm" name="{{ sq.id }}">  
-                        {% for option in sq.question.options.items %}  
-                        <option value="{{ option.0 }}">{{ option.1 }}</option>  
+                        {% for option in sq.question.options %}  
+                            <option value="{{ option }}">{{ option }}</option>  
                         {% endfor %}  
-                    </select>  
+                    </select>   
+                {% elif sq.question.question_type == 'multiple_select' %}  
+                    <select class="form-select form-select-sm" name="{{ sq.id }}" multiple>  
+                        {% for option in sq.question.options %}  
+                            <option value="{{ option }}">{{ option }}</option>  
+                        {% endfor %}  
+                    </select>   
                 {% elif sq.question.question_type == 'text' %}  
                     <textarea class="form-control" name="{{ sq.id }}" rows="4"></textarea>  
                 {% elif sq.question.question_type == 'rating' %}  
-                    <input class="form-control" type="number" name="{{ sq.id }}" min="1" max="5" step="1">  
+                    <input class="form-control" type="number" name="{{ sq.id }}" min="0" step="1">
+                
                 {% endif %}  
             </div>  
             {% endfor %}  

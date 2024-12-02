@@ -46,6 +46,7 @@ class Question(MPTTModel):
     
     QUESTION_TYPES = [  
         ('multiple_choice', 'Multiple Choice'),  
+        ('multiple_select', 'Multiple Select'),  
         ('text', 'Text'),  
         ('rating', 'Rating'),  
     ]  
