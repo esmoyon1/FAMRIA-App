@@ -3,7 +3,7 @@ from .views import *
 from . import views
 
 urlpatterns = [  
-    path('', dashboard, name='dashboard'),  # Set dashboard as the landing page 
+    path('', survey_list, name='dashboard'),  # Set dashboard as the landing page 
     path('surveys/', survey_list, name='survey-list'),  # Survey list URL 
     path('surveys/create/', survey_create, name='survey-create'),  # Create a question  
     path('surveys/<int:survey_id>/', survey_detail, name='survey-detail'),  # Survey detail URL 
