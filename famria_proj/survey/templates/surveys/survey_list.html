@@ -22,10 +22,17 @@
         {% comment %} {% for survey in surveys %}   {% endcomment %}
         {% for s in survey_data %}  
             <li class="list-group-item">  
-                <h5>{{ s.survey.title }}</h5>  
-                <p>{{ s.survey.description }}</p>
+                <h5>{{ s.survey.title }} {% if s.survey.status %} <span class="badge bg-success">Active </span>
+                  {% else %}<span class="badge bg-danger">Inactive</span> {% endif %}</h5>  
+                
+                <p>
+                  {{ s.survey.description }}</p>
+                {% comment %} <p>Status: 
+                  {% if s.survey.status %} <span class="badge bg-success">Active </span>
+                  {% else %}<span class="badge bg-danger">Inactive</span> {% endif %}
+                </p> {% endcomment %}
                 <div class="btn-group me-2">
-                    <a href="{% url 'survey-response' s.survey.id %}" type="button" class="btn btn-sm btn-outline-info">Take Survey
+                    <a href="{% url 'survey-response' s.survey.id %}" type="button" class="btn btn-sm btn-outline-info {% if not s.survey.status %}disabled{% endif %} " >Take Survey
                       <span class="badge text-bg-secondary">{{ s.question_count }} Questions</span>
                     </a>
                     {% if user.is_authenticated %} 

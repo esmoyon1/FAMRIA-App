@@ -18,20 +18,32 @@
     <table id="example" class="table table-striped table-sm" style="width:100%">
         <thead>  
             <tr>  
-                <th>ID</th>  
+                {% comment %} <th>ID</th>   {% endcomment %}
                 <th>Sector</th>  
                 <th>Text</th>  
                 <th>Type</th>  
+                <th>Survey(s)</th>
                 <th>Actions</th>  
             </tr>  
         </thead>  
         <tbody>  
             {% for question in questions %}
                 <tr>  
-                    <td>{{ question.id }}</td> 
+                    {% comment %} <td>{{ question.id }}</td>  {% endcomment %}
                     <td>{{ question.sector }}</td>  
                     <td>{{ question.text }} (v{{ question.version }})</td>  
                     <td>{{ question.question_type }}</td> 
+                    <td>                        
+                        {% if question.related_surveys %}
+                            <ul>
+                                {% for survey_question in question.related_surveys %}
+                                    <li>{{ survey_question.survey.title }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            No associated surveys.
+                        {% endif %}
+                    </td> 
                     <td>  
                         <div class="btn-group" role="group" aria-label="Basic outlined example">
                             <a href="{% url 'update-question' question.id %}" type="button" class="btn btn-sm btn-outline-warning">Edit</a>  

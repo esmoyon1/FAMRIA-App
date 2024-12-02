@@ -85,7 +85,7 @@ class Survey(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, default=1)  
     created_at = models.DateTimeField(auto_now_add=True)  
     updated_at = models.DateTimeField(auto_now=True)
-    status = models.IntegerField(_("Status"), default=0) # 1=Accepting Responses, 0 = Otherwise
+    status = models.IntegerField(_("Status"), default=0, help_text="Set to Zero (0) to stop accepting responses.") # 1=Accepting Responses, 0 = Otherwise
 
     def __str__(self):  
         return self.title  

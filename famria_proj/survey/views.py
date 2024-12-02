@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 from django.core.files.storage import FileSystemStorage  
 from django.core.exceptions import ValidationError 
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
-from django.db.models import Count  
+from django.db.models import Count, Prefetch
 import csv, json  
 from .models import * #Survey, Question, Response, SurveyQuestion, SurveyResponse
 from .forms import * #QuestionForm, SurveyForm
@@ -515,7 +515,14 @@ class QuestionImportView(View):
 # Read (list) all questions  
 @login_required  
 def question_list(request):  
-    questions = Question.objects.all().order_by('id')  
+    questions = Question.objects.prefetch_related(
+        Prefetch(
+            'surveyquestion_set',
+            queryset=SurveyQuestion.objects.select_related('survey'),
+            to_attr='related_surveys'
+        )
+    )  
+
     return render(request, 'questions/question_list.html', {'questions': questions})  
 
 # Update an existing question  
