@@ -25,7 +25,7 @@
       },
       {
         "src": "/(.*)",
-        "dest": "/"
+        "dest": "famria_proj/wsgi.py"
       }
     ]
   }
