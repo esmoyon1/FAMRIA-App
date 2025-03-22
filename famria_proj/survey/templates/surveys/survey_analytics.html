@@ -5,7 +5,8 @@
 <h1>{{ survey.title }}</h1>  
 <p>{{ survey.description }}</p>  
 <h2>Survey Analytics</h2>  
-<p>Total Responses: {{ analytics_data.total_responses }}</p>  
+<p>Total Responses: {{ analytics_data.total_responses }}</p> 
+<a href="{% url 'survey-list' %}">Back to Surveys</a>  
 
     <!-- Filter Form -->  
     {% comment %} <form method="get">  
@@ -51,5 +52,4 @@
     </tbody>  
 </table>  
 
-<a href="{% url 'survey-list' %}">Back to Surveys</a>  
 {% endblock main_content %}

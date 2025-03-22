@@ -34,6 +34,7 @@
           <form action="{% url 'survey-detail' survey.id %}" method="post" style="display:inline;">  
             {% csrf_token %}  
             <input type="hidden" name="question_id" value="{{ sq.question.id }}"> 
+            <button type="button" data-toggle="modal" data-target="#editQ-modal" class="btn btn-sm btn-outline-warning" name="edit_question">Edit</button>  
             <button type="submit" class="btn btn-sm btn-outline-danger" name="remove_question">Remove</button>  
           </form>  
         </li>  
@@ -106,6 +107,27 @@
   </div>
 </div>
 
+    <!-- The Modal -->  
+    <div class="modal fade" id="editQ-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">  
+      <div class="modal-dialog" role="document">  
+        <div class="modal-content">  
+          <div class="modal-header">  
+            <h5 class="modal-title" id="exampleModalLabel">Modal Title</h5>  
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">  
+              <span aria-hidden="true">&times;</span>  
+            </button>  
+          </div>  
+          <div class="modal-body">  
+            <!-- Modal content here -->  
+            <p>This is a simple modal example.</p>  
+          </div>  
+          <div class="modal-footer">  
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>  
+            <button type="button" class="btn btn-primary">Save changes</button>  
+          </div>  
+        </div>  
+      </div>  
+    </div>  
 <hr>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>  
