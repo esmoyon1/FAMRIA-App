@@ -2,54 +2,89 @@
 {% load crispy_forms_tags %}
 {% block main_content %}
 {% comment %} <h1>{% if object %}Edit{% else %}Create{% endif %} Survey</h1>   {% endcomment %}
-<h1>{{ survey.title }}</h1>  
+<style>
+
+    .chart-container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 50%;
+        min-width: 300px;
+    }
+    @media (max-width: 768px) {
+        .chart-container {
+            width: 100%;
+        }
+    }
+</style>
+<h1>{{ survey }} {{ survey.title }}</h1>  
 <p>{{ survey.description }}</p>  
 <h2>Survey Analytics</h2>  
 <p>Total Responses: {{ analytics_data.total_responses }}</p> 
 <a href="{% url 'survey-list' %}">Back to Surveys</a>  
 
-    <!-- Filter Form -->  
-    {% comment %} <form method="get">  
-        <label for="question">Filter by Question:</label>  
-        <select name="question" id="question" onchange="this.form.submit()">  
-            <option value="">-- Select a Question --</option>  
-            {% for question in survey_questions %}  
-                <option value="{{ question.id }}" {% if selected_question == question.id %} selected {% endif %}>
-                    {{ question.question.text }}  
-                </option>  
-            {% endfor %}    
-        </select>  
-        <input type="submit" value="Filter">  
-    </form>  
+<div class="container-fluid">
+    {% comment %} <div class="row"> {% endcomment %}
+        <div class="accordion" id="accordionAnalytics">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingAI">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAI" aria-expanded="true" aria-controls="collapseAI">
+                  AI Generated Insights (GPT-4.1)
+                </button>
+              </h2>
+              <div id="collapseAI" class="accordion-collapse collapse show" aria-labelledby="headingAI" data-bs-parent="#accordionAnalytics">
+                <div class="accordion-body">
+                    <pre style="white-space: pre-wrap;">{{ analytics_data.gpt_analysis|safe }}</pre>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingRaw">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRaw" aria-expanded="false" aria-controls="collapseRaw">
+                  Raw responses
+                </button>
+              </h2>
+              <div id="collapseRaw" class="accordion-collapse collapse" aria-labelledby="headingRaw" data-bs-parent="#accordionAnalytics">
+                <div class="accordion-body">
+                         
+                    <table class="table">  
+                        <thead>  
+                            <tr>  
+                                <th>Question</th>  
+                                <th>Responses</th>  
+                                {% comment %} <th>Response Count</th>   {% endcomment %}
+                            </tr>  
+                        </thead>  
+                        <tbody>  
+                            {% for question in analytics_data.questions %}  
+                            <tr>  
+                                <td>{{ question.question }}</td>  
+                                <td>  
+                                    <ul>  
+                                        {% for answer, count in question.responses.items %}  
+                                        <li>{{ answer }}: {{ count }} responses</li>  
+                                        {% endfor %}  
+                                    </ul>  
+                                </td>  
+                                {% comment %} <td>{{ question.response_count }}</td>   {% endcomment %}
+                            </tr>  
+                            {% empty %}  
+                            <tr>  
+                                <td colspan="3">No questions available for this survey.</td>  
+                            </tr>  
+                            {% endfor %}  
+                        </tbody>  
+                    </table>  
+                </div>
+              </div>
+            </div>
+        </div>
+        
+    {% comment %} </div>
+    <div class="row">
+           
 
-    <p>Selected Question: {{ selected_question.text }}</p>   {% endcomment %}
-<table>  
-    <thead>  
-        <tr>  
-            <th>Question</th>  
-            <th>Responses</th>  
-            <th>Response Count</th>  
-        </tr>  
-    </thead>  
-    <tbody>  
-        {% for question in analytics_data.questions %}  
-        <tr>  
-            <td>{{ question.question }}</td>  
-            <td>  
-                <ul>  
-                    {% for answer, count in question.responses.items %}  
-                    <li>{{ answer }}: {{ count }} responses</li>  
-                    {% endfor %}  
-                </ul>  
-            </td>  
-            <td>{{ question.response_count }}</td>  
-        </tr>  
-        {% empty %}  
-        <tr>  
-            <td colspan="3">No questions available for this survey.</td>  
-        </tr>  
-        {% endfor %}  
-    </tbody>  
-</table>  
-
+    </div> {% endcomment %}
+</div>
 {% endblock main_content %}

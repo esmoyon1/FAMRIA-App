@@ -11,8 +11,17 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.db.models import Count, Prefetch
 import csv, json  
 from .models import * #Survey, Question, Response, SurveyQuestion, SurveyResponse
-from .forms import * #QuestionForm, SurveyForm
+from .forms import * #QuestionForm, S xxxxurveyForm
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+from openai import OpenAI
+# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+client = OpenAI(
+    api_key= os.getenv("OPENAI_API_KEY") 
+)
+import openai
 # Create your views here.
 
 def register(request):  
@@ -114,9 +123,16 @@ def dashboard(request):
     
     # return render(request, 'dashboard.html')  
 
+theprompt = "give me list of sci-fi moview related to cyber-security"
 def survey_list(request):  
     surveys = Survey.objects.all()  
-    
+    # response = client.responses.create(
+    #     model="gpt-4.1",
+    #     input=theprompt #"Write a one-sentence bedtime story about a pink cow."
+
+    # )
+
+    # print(response.output_text)
     # Prepare a list to hold survey data along with question and response counts  
     survey_data = []  
     
@@ -132,6 +148,7 @@ def survey_list(request):
             'survey': survey,  
             'question_count': question_count,  
             'response_count': response_count,  
+            # 'chatresponses': response.output_text,
         }) 
      
     
@@ -272,18 +289,16 @@ def survey_analytics(request, survey_id):
 
     # Initialize filtering variable  
     selected_question = request.GET.get('question')  
-    print(selected_question)
+    # print(selected_question)
     if selected_question:  
         # Filter responses based on selected question  
         responses = responses.filter(answers__survey_question__id=selected_question)  
     
-    print(responses)
     # Prepare analytics data  
     analytics_data = {  
         'total_responses': responses.count(),  
-        'questions': []  
+        'questions': [],  # 'gpt_analysis': generated_output  # Include the generated analysis from GPT  
     }  
-    
     for survey_question in survey.surveyquestion_set.all():  
         question_data = {  
             'question': survey_question.question.text,  
@@ -301,12 +316,76 @@ def survey_analytics(request, survey_id):
                 continue  
         
         analytics_data['questions'].append(question_data)  
+    # print(analytics_data)
+    # Prepare the prompt for the API  
+    prompt = f"""  
+    You are an expert data and language analyst. You are provided with a collection of open-ended survey responses written in both English and Tagalog.
 
+    Your task is to analyze the responses and generate a clear, structured summary that includes:
+    - Identification of recurring themes and key insights across responses.
+    - Sentiment analysis (e.g., strongly positive, neutral, concerns, etc.).
+    - Relevant statistical patterns, estimates, and comparative highlights.
+    - A concise executive summary of key findings for stakeholders.
+    - Use Markdown formatting with appropriate headings, bullet points, and tables for easy presentation and readability.
+
+    Survey Title: {survey.title}
+    Description: {survey.description}
+    Survey Responses: {analytics_data} 
+    """  
+    # print("Prompt:---: ", prompt)
+    try: 
+        response = client.responses.create(
+            model="gpt-4.1",
+            input= prompt#"Write a one-sentence bedtime story about a pink cow."
+        )
+
+        print(dir(response))
+        generated_output = response.output[0].content[0].text
+        # generated_output = "This is the AI generated Response"
+
+    # except openai.error.OpenAIError as e:  # Ensure that OpenAIError is available  
+    #     generated_output = f"Error communicating with OpenAI: {str(e)}"  
+    except Exception as e:  # Catch other unexpected errors  
+        generated_output = f"An unexpected error occurred: {str(e)}"  
+    
+    # print("ChatGPT Response: ", generated_output)
+
+    analytics_data.setdefault('gpt_analysis', []).append(generated_output)
+
+    #### Deep Seek Starts Here #####
+    # for backward compatibility, you can still use `https://api.deepseek.com/v1` as `base_url`.
+    # client = OpenAI(api_key=deepseek_key, base_url="https://api.deepseek.com")
+
+    # response = client.chat.completions.create(
+    #     model="deepseek-chat",
+    #     messages=[
+    #         {"role": "system", "content": prompt},
+    #         {"role": "user", "content": "Hello"},
+    # ],
+    #     max_tokens=1024,
+    #     temperature=0.7,
+    #     stream=False
+    # )
+    # deepSeek = response.choices[0].message.content
+    # print("DeepSeek Response: ", deepSeek )
+
+    #### Deep Seek Ends Here #####
+    import markdown
+
+    if isinstance(analytics_data.get("gpt_analysis"), list):
+        analysis_raw = analytics_data["gpt_analysis"][0]
+    else:
+        analysis_raw = analytics_data["gpt_analysis"]
+    
+    # Convert markdown to HTML
+    analytics_data["gpt_analysis"] = markdown.markdown(analysis_raw)
+    print(analytics_data)
     context = {  
         'survey': survey,  
         'analytics_data': analytics_data,  
         'survey_questions': survey_questions,  
         'selected_question': selected_question,  
+        # 'deepSeek': deepSeek,  
     }  
     return render(request, 'surveys/survey_analytics.html', context)  
 
