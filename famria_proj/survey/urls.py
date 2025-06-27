@@ -1,6 +1,6 @@
 from django.urls import path  
 from .views import * 
-from . import views
+# from . import views
 
 urlpatterns = [  
     path('', dashboard, name='dashboard'),  # Set dashboard as the landing page 
