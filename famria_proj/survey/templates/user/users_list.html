@@ -33,16 +33,18 @@
             {% for u in users %}
                 <tr>  
                     <td>{{ u.id }}</td> 
-                    <td>{{ u.user.username }}</td>  
-                    <td>{{ u.get_full_name }}</td>  
-                    <td>{{ u.user.is_active }}</td>  
-                    <td>{{ u.user.date_joined }}</td>  
-                    <td>{{ u.user.last_login }}</td>  
+                    <td>{{ u.username }}</td>  
+                    <td>{{ u.first_name }} {{ u.last_name }}</td>  
+                    <td>{{ u.is_active }}</td>  
+                    <td>{{ u.date_joined }}</td>  
+                    <td>{{ u.last_login }}</td>  
                     <td>  
                         <div class="btn-group" role="group" aria-label="Basic outlined example">
-                            <a href="{% url 'update-question' u.id %}" type="button" class="btn btn-sm btn-outline-warning">Edit</a>  
-                            <form action="{% url 'delete-question' u.id %}" method="post" style="display:inline;">  
+                            <a href="{% url 'edit_profile' %}?user_id={{ u.id }}" type="button" class="btn btn-sm btn-outline-warning">Edit</a>  
+                            <form action="{% url 'users-list' %}" method="post" style="display:inline;">  
                                 {% csrf_token %}  
+                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                <input type="hidden" name="action" value="delete">
                                 <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>  
                             </form>  
                         </div>

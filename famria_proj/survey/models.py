@@ -4,12 +4,28 @@ from mptt.models import MPTTModel, TreeForeignKey
 from django.core.exceptions import ValidationError  
 from django.utils.translation import gettext as _ 
 
+class UserRole(models.Model):
+    ROLE_CHOICES = [
+        ('admin', 'Administrator'),
+        ('staff', 'Staff'),
+        ('enumerator', 'Enumerator'),
+        ('respondent', 'Respondent')
+    ]
+    
+    name = models.CharField(max_length=50, choices=ROLE_CHOICES, unique=True)
+    description = models.TextField(blank=True)
+    
+    def __str__(self):
+        return self.get_name_display()
+
+
 class UserProfile(models.Model):  
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')  
     bio = models.TextField(blank=True, null=True)  
     # profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)  
     phone_number = models.CharField(max_length=15, blank=True, null=True)  
-    location = models.CharField(max_length=255, blank=True, null=True)  
+    location = models.CharField(max_length=255, blank=True, null=True)
+    role = models.ForeignKey(UserRole, on_delete=models.SET_NULL, null=True, default=None)
 
     def __str__(self):  
         return f"{self.user.username}'s Profile"  
