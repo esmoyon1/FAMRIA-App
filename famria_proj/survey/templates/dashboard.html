@@ -107,9 +107,8 @@
         display: block !important;
       }
       .app-title {
-        color:rgb(2, 40, 20); /* Darker color */
-        font-weight: bold; /* Make text bolder */
-        {% comment %} font-size: 1.5rem; /* Adjust font size for clarity */ {% endcomment %}
+        color: rgb(2, 40, 20);
+        font-weight: bold;
       }
     </style>
 
@@ -204,7 +203,7 @@
     <h1 class="app-title mb-0">Survey Management App</h1> <!-- Added mb-0 to remove margin-bottom -->
     
   </div><ul class="navbar-nav flex-row d-none d-md-flex">
-      <li class="nav-item text-nowrap">
+      <li class="nav-item">
         <button class="nav-link px-3 text-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
           <svg class="bi"><use xlink:href="#list"/></svg>
         </button>
@@ -223,46 +222,55 @@
         </div>
         <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
           <ul class="nav flex-column">
-            {% comment %} <li class="nav-item">
-              <a class="nav-link d-flex align-items-center gap-2 active" aria-current="page" href="{% url 'dashboard' %}">
-                <svg class="bi"><use xlink:href="#house-fill"/></svg>
-                Dashboard
-              </a>
-            </li> {% endcomment %}
-            
-            {% if user.is_authenticated %} 
+            {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link d-flex align-items-center gap-2">
+              <span>Welcome {{ user.profile.role.name}} <br>{{ user}}</span>
+            </a>
+            </li>
+            {% if user.profile.role.name != 'respondent' %}
             <li class="nav-item">
               <a class="nav-link d-flex align-items-center gap-2" href="{% url 'question-list' %}">
-                {% comment %} <svg class="bi"><use xlink:href="#file-earmark"/></svg> {% endcomment %}
-                <span class="material-icons icon">quiz</span> 
+                <span class="material-icons icon">quiz</span>  
                 Question Management
               </a>
             </li>
             {% endif %}
+            {% endif %}
             <li class="nav-item">
               <a class="nav-link d-flex align-items-center gap-2" href="{% url 'survey-list' %}">
-                {% comment %} <svg class="bi"><use xlink:href="#cart"/></svg> {% endcomment %}
                 <span class="material-icons icon">ballot</span>  
                 Surveys
               </a>
             </li>
-            
-            {% if user.is_authenticated %} 
+
+            {% if user.is_authenticated %}
+            {% if user.profile.role.name != 'respondent' %}
+            <li class="nav-item">
+              <a class="nav-link d-flex align-items-center gap-2" href="{% url 'edit_profile' %}">
+                <span class="material-icons icon">account_circle</span>  
+                Edit Profile
+              </a>
+            </li>
+            {% endif %}
+            {% if user.is_superuser or user.profile.role.name == 'admin' %}
             <li class="nav-item">
               <a class="nav-link d-flex align-items-center gap-2" href="{% url 'users-list' %}">
-                {% comment %} <svg class="bi"><use xlink:href="#people"/></svg> {% endcomment %}
-                
-                <span class="material-icons icon">manage_accounts</span>  
+                <span class="material-icons icon">group</span>  
                 User Management
               </a>
             </li>
+            {% endif %}
+
+            {% if user.profile.role.name == 'admin' or user.profile.role.name == 'staff' %}
             <li class="nav-item">
               <a class="nav-link d-flex align-items-center gap-2" href="{% url 'dashboard' %}">
-                {% comment %} <svg class="bi"><use xlink:href="#graph-up"/></svg> {% endcomment %}
                 <span class="material-icons icon">poll</span>  
                 Reports
               </a>
             </li>
+            {% endif %}
+
             {% endif %}
             {% comment %} <li class="nav-item">
               <a class="nav-link d-flex align-items-center gap-2" href="#">
@@ -281,20 +289,15 @@
                 Settings
               </a>
             </li> {% endcomment %}
+
+            {% if user.is_superuser or user.profile.role.name == 'admin' %}
             <li class="nav-item">
               <a class="nav-link d-flex align-items-center gap-2" href="{% url 'register' %}">
-                {% comment %} <svg class="bi"><use xlink:href="#door-open"/></svg> {% endcomment %}
-                <span class="material-icons icon">start</span>  
-                Getting Started
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link d-flex align-items-center gap-2" href="{% url 'register' %}">
-                {% comment %} <svg class="bi"><use xlink:href="#door-closed"/></svg> {% endcomment %}
-                <span class="material-icons icon">how_to_reg</span>  
+                <span class="material-icons icon">person_add</span>  
                 Register
               </a>
-              
+            </li>
+            {% endif %}  
             </li>
             
             {% if user.is_authenticated %} 
@@ -321,6 +324,16 @@
     </div>
 
     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      {% if messages %}
+      <div class="messages mt-3">
+          {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endfor %}
+      </div>
+      {% endif %}
       {% block main_content %}
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Dashboard</h1>
@@ -425,70 +438,50 @@
      <script src="https://getbootstrap.com/docs/5.3/examples/dashboard/dashboard.js"></script></body>
     
 <script>
-  const categories = [  
-        {% for s in survey_data %}  
-            "{{ s.survey.title }}"{% if not forloop.last %}, {% endif %}  
-        {% endfor %}  
-    ];  
+  const chartData = {
+    categories: [{% for s in survey_data %}"{{ s.survey.title }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+    questions: [{% for s in survey_data %}{{ s.question_count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+    responses: [{% for s in survey_data %}{{ s.response_count }}{% if not forloop.last %},{% endif %}{% endfor %}]
+  };
 
-    const questionsData = [  
-        {% for s in survey_data %}  
-            {{ s.question_count }}{% if not forloop.last %}, {% endif %}  
-        {% endfor %}  
-    ];  
-
-    const responseData = [  
-        {% for s in survey_data %}  
-            {{ s.response_count }}{% if not forloop.last %}, {% endif %}  
-        {% endfor %}  
-    ];  
-  Highcharts.chart('container', {
-   chart: {
-       type: 'column'
-   },
-   title: {
-       text: 'Active Survey Questions and Responses',
-       align: 'left'
-   },
-   subtitle: {
-       text:
-           'Source: <a target="_blank" href="https://www.indexmundi.com/agriculture/?commodity=corn">.</a>',
-           
-       align: 'left'
-   },
-   xAxis: {
-       categories: categories, // ['USA', 'China', 'Brazil', 'EU', 'Argentina', 'India'],
-       crosshair: true,
-       accessibility: {
-           description: 'Surveys'
-       }
-   },
-   yAxis: {
-       min: 0,
-       title: {
-           text: 'Count'
-       }
-   },
-   tooltip: {
-       valueSuffix: ''
-   },
-   plotOptions: {
-       column: {
-           pointPadding: 0.2,
-           borderWidth: 0
-       }
-   },
-   series: [
-       {
-           name: 'Questions',
-           data: questionsData, //[387749, 280000, 129000, 64300, 54000, 34300]
-       },
-       {
-           name: 'Responses',
-           data: responseData,  //[45321, 140000, 10000, 140500, 19500, 113500]
-       }
-   ]
-});
+  const chart = Highcharts.chart('container', {
+    chart: {
+      type: 'column'
+    },
+    title: {
+      text: 'Survey Data'
+    },
+    xAxis: {
+      categories: chartData.categories,
+      crosshair: true
+    },
+    yAxis: {
+      min: 0,
+      title: {
+        text: 'Count'
+      }
+    },
+    tooltip: {
+      headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+      pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td><td style="padding:0"><b>{point.y}</b></td></tr>',
+      footerFormat: '</table>',
+      shared: true,
+      useHTML: true
+    },
+    plotOptions: {
+      column: {
+        pointPadding: 0.2,
+        borderWidth: 0
+      }
+    },
+    series: [{
+      name: 'Questions',
+      data: chartData.questions
+    }, {
+      name: 'Responses',
+      data: chartData.responses
+    }]
+  });
 </script>
 {% block charts %}
 

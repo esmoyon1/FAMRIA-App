@@ -1,6 +1,8 @@
 import json
 from django import forms
 from .models import Question
+from django.contrib.auth.models import User
+from .models import UserProfile, UserRole
 from crispy_forms.helper import FormHelper  
 from crispy_forms.layout import Submit  
 
@@ -30,11 +32,18 @@ from django import forms
 from .models import * #Survey, Question, Response  
 
 class UserProfileForm(forms.ModelForm):  
-    first_name = forms.CharField(max_length=30, required=True)  
-    last_name = forms.CharField(max_length=30, required=True)
+    role = forms.ModelChoiceField(
+        queryset=UserRole.objects.all(),
+        required=True,
+        empty_label=None
+    )
+
     class Meta:  
         model = UserProfile  
-        fields = ['bio', 'phone_number', 'location']  
+        fields = ['bio', 'phone_number', 'location', 'role']  
+
+    first_name = forms.CharField(max_length=30, required=True)  
+    last_name = forms.CharField(max_length=30, required=True)
 
 class SurveyForm(forms.ModelForm):  
     class Meta:  
