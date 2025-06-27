@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate, logout  
 from django.contrib import messages
+from .decorators import role_required, has_permission
 from django.contrib.auth.forms import UserCreationForm
 from django.views import View  
 from django.views.decorators.http import require_POST  
@@ -24,23 +25,54 @@ client = OpenAI(
 import openai
 # Create your views here.
 
-def register(request):  
-    if request.method == 'POST':  
-        form = UserCreationForm(request.POST)  
-        if form.is_valid():  
-            user = form.save()  
-            
-            # Create a UserProfile only if it doesn't already exist  
-            if not UserProfile.objects.filter(user=user).exists():  
-                UserProfile.objects.create(user=user)  # Create a profile for the user  
+@login_required
+def register(request):
+    # Check if the current user is an admin
+    if not request.user.is_superuser:
+        messages.error(request, 'Only administrators can register new users.')
+        return redirect('dashboard')
 
-            login(request, user)  # Automatically log in the user after registration  
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        profile_form = UserProfileForm(request.POST)
+        if form.is_valid() and profile_form.is_valid():
+            # Store the current admin user
+            admin_user = request.user
             
-            messages.success(request, 'Registration successful! Please complete your profile.')  
-            return redirect('edit_profile')  # Send to edit profile    
-    else:  
-        form = UserCreationForm()  
-    return render(request, 'user/register.html', {'form': form})  
+            # Create the new user
+            user = form.save()
+            
+            # Delete existing profile if it exists
+            UserProfile.objects.filter(user=user).delete()
+            
+            # Create new profile
+            profile = profile_form.save(commit=False)
+            profile.user = user
+            
+            # Set default role as respondent if not specified
+            if not profile.role:
+                profile.role = UserRole.objects.get(name='respondent')
+            profile.save()
+            
+            # Don't log in the new user, keep admin logged in
+            messages.success(
+                request,
+                f'User {user.username} has been successfully created with role: {profile.role.name}'
+            )
+            # Clear the forms for a new registration
+            form = UserCreationForm()
+            profile_form = UserProfileForm(initial={'role': UserRole.objects.get(name='respondent')})
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = UserCreationForm()
+        profile_form = UserProfileForm(initial={'role': UserRole.objects.get(name='respondent')})
+    
+    return render(request, 'user/register.html', {
+        'form': form,
+        'profile_form': profile_form,
+        'title': 'Register New User'
+    })
 
 @login_required  
 def profile(request):  
@@ -49,21 +81,33 @@ def profile(request):
 
 @login_required  
 def edit_profile(request):  
-    user_profile = get_object_or_404(UserProfile, user=request.user)  
+    # Check if admin is editing another user's profile
+    user_id = request.GET.get('user_id')
+    if user_id and request.user.is_superuser:
+        user = get_object_or_404(User, id=user_id)
+    else:
+        user = request.user
+
+    user_profile = get_object_or_404(UserProfile, user=user)
+    
     if request.method == 'POST':  
         user_form = UserProfileForm(request.POST, request.FILES, instance=user_profile)  
         if user_form.is_valid():  
             # Save the User info (first_name, last_name)  
-            request.user.first_name = user_form.cleaned_data.get('first_name')  
-            request.user.last_name = user_form.cleaned_data.get('last_name')  
-            request.user.save()  
+            user.first_name = user_form.cleaned_data.get('first_name')  
+            user.last_name = user_form.cleaned_data.get('last_name')  
+            user.save()  
             # Save the User Profile info (bio, phone_number, location)  
             user_profile.bio = user_form.cleaned_data.get('bio')  
             user_profile.phone_number = user_form.cleaned_data.get('phone_number')  
             user_profile.location = user_form.cleaned_data.get('location')  
+            if request.user.is_superuser:  # Only admin can change roles
+                user_profile.role = user_form.cleaned_data.get('role')
             user_profile.save()  
             
-            messages.success(request, 'Profile updated successfully!')  
+            messages.success(request, 'Profile updated successfully!')
+            if request.user.is_superuser and user_id:  # If admin editing another user
+                return redirect('users-list')
             return redirect('profile')  # Redirect to the profile page after saving  
     else:  
         user_form = UserProfileForm(initial={  
@@ -93,11 +137,23 @@ def user_logout(request):
     logout(request)  
     return redirect('login')  # Redirect to the login page 
 
-def users_list(request):  
-    users = UserProfile.objects.all() 
-     
-    return render(request, 'user/users_list.html', {"users": users})  
-    # return render(request, 'surveys/survey_list.html', {'surveys': surveys})
+@login_required
+# @role_required(['admin'])
+def users_list(request):
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        action = request.POST.get('action')
+        if action == 'delete' and user_id:
+            user = get_object_or_404(User, id=user_id)
+            if not user.is_superuser:  # Prevent deletion of superusers
+                user.delete()
+                messages.success(request, 'User deleted successfully!')
+            else:
+                messages.error(request, 'Cannot delete superuser accounts!')
+        return redirect('users-list')
+    
+    users = User.objects.filter(is_superuser=False)  # Exclude superusers from the list
+    return render(request, 'user/users_list.html', {'users': users})  
 
 def dashboard(request):  
     
@@ -124,6 +180,8 @@ def dashboard(request):
     # return render(request, 'dashboard.html')  
 
 theprompt = "give me list of sci-fi moview related to cyber-security"
+# @login_required
+# @role_required(['admin', 'staff', 'enumerator', 'respondent'])
 def survey_list(request):  
     surveys = Survey.objects.all()  
     # response = client.responses.create(
@@ -156,7 +214,8 @@ def survey_list(request):
     # return render(request, 'surveys/survey_list.html', {'surveys': surveys})
 
 # Create a new survey 
-@login_required   
+@login_required
+@role_required(['admin', 'staff'])
 def survey_create(request):  
     if request.method == 'POST':  
         form = SurveyForm(request.POST)  
@@ -168,7 +227,8 @@ def survey_create(request):
         form = SurveyForm()  
     return render(request, 'surveys/survey_form.html', {'form': form})  
 
-@login_required  
+@login_required
+@role_required(['admin', 'staff', 'enumerator'])
 def survey_detail(request, survey_id):  
     survey = get_object_or_404(Survey, id=survey_id)  
         
@@ -205,6 +265,8 @@ def survey_detail(request, survey_id):
         'response_count': response_count,  
     })
 
+@login_required
+@role_required(['admin', 'staff', 'enumerator', 'respondent'])
 def survey_response(request, survey_id):  
     survey = get_object_or_404(Survey, id=survey_id)  
     assigned_questions = survey.surveyquestion_set.all()  
@@ -253,7 +315,8 @@ def survey_response(request, survey_id):
         'assigned_questions': assigned_questions,  
     })  
 
-@login_required  
+@login_required
+@role_required(['admin', 'staff', 'enumerator'])
 def survey_responses(request, survey_id=None):  
     # Get all SurveyResponse instances or filter by the specific survey  
     if survey_id:  
@@ -268,7 +331,8 @@ def survey_responses(request, survey_id=None):
         'survey': survey,  
     })  
 
-@login_required  
+@login_required
+@role_required(['admin', 'staff'])
 def survey_response_detail(request, id):  
     survey_response = get_object_or_404(SurveyResponse, id=id)  
     return render(request, 'surveys/survey_response_detail.html', {  
@@ -278,6 +342,8 @@ def survey_response_detail(request, id):
 def survey_thanks(request):  
     return render(request, 'surveys/survey_thanks.html')  
 
+@login_required
+@role_required(['admin', 'staff'])
 def survey_analytics(request, survey_id):  
     survey = get_object_or_404(Survey, id=survey_id)  
     
@@ -390,7 +456,8 @@ def survey_analytics(request, survey_id):
     return render(request, 'surveys/survey_analytics.html', context)  
 
 # Update an existing question  
-@login_required  
+@login_required
+@role_required(['admin', 'staff', 'enumerator'])
 def survey_update(request, survey_id):  
     survey = get_object_or_404(Survey, id=survey_id)  
     if request.method == 'POST':  
@@ -403,8 +470,22 @@ def survey_update(request, survey_id):
         form = SurveyForm(instance=survey)  
     return render(request, 'surveys/survey_form.html', {'form': form})  
 
+@login_required
+# @role_required(['admin', 'staff', 'enumerator'])
+def edit_profile(request):
+    if request.method == 'POST':
+        profile_form = UserProfileForm(request.POST, instance=request.user.profile)
+        if profile_form.is_valid():
+            profile_form.save()
+            messages.success(request, 'Your profile was successfully updated!')
+            return redirect('profile')
+    else:
+        profile_form = UserProfileForm(instance=request.user.profile)
+    return render(request, 'user/edit_profile.html', {'profile_form': profile_form})  
+
 # Delete a Survey  
-@login_required  
+@login_required
+@role_required(['admin', 'staff'])
 def survey_delete(request, survey_id):  
     survey = get_object_or_404(Survey, id=survey_id)  
     if request.method == 'POST':  
@@ -520,7 +601,8 @@ def import_responses(request, survey_id):
     return HttpResponseBadRequest("Invalid request method.", status=400)
 
 # Create a new question  
-@login_required  
+@login_required
+@role_required(['admin', 'staff'])
 def create_question(request):  
     if request.method == 'POST':  
         form = QuestionForm(request.POST)  
@@ -543,7 +625,7 @@ class QuestionImportView(View):
             filename = fs.save(csv_file.name, csv_file)  
             file_path = fs.url(filename)  # You can change how you handle the path.  
             
-            file_path = "C:\\Moyon\Dev\\FAMRIA App\\famria_proj\\survey\\physical.csv"
+            # file_path = "C:\\Moyon\Dev\\FAMRIA App\\famria_proj\\survey\\physical.csv"
             
             # Import logic here  
             try:
@@ -592,7 +674,8 @@ class QuestionImportView(View):
         return render(request, 'questions/import_questions.html')  
 
 # Read (list) all questions  
-@login_required  
+@login_required
+@role_required(['admin', 'staff', 'enumerator'])
 def question_list(request):  
     questions = Question.objects.prefetch_related(
         Prefetch(
@@ -605,7 +688,8 @@ def question_list(request):
     return render(request, 'questions/question_list.html', {'questions': questions})  
 
 # Update an existing question  
-@login_required  
+@login_required
+@role_required(['admin', 'staff'])
 def update_question(request, question_id):  
     question = get_object_or_404(Question, id=question_id)  
     if request.method == 'POST':  
@@ -619,7 +703,8 @@ def update_question(request, question_id):
     return render(request, 'questions/question_form.html', {'form': form})  
 
 # Delete a question  
-@login_required  
+@login_required
+@role_required(['admin', 'staff'])
 def delete_question(request, question_id):  
     question = get_object_or_404(Question, id=question_id)  
     if request.method == 'POST':  
