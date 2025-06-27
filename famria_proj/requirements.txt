@@ -19,7 +19,7 @@ importlib-metadata==8.7.0
 jiter==0.9.0
 markdown==3.8
 openai==1.76.0
-psycopg2==2.9.10
+# psycopg2==2.9.10 # this lead to error in vercel
 psycopg2-binary==2.9.10
 pydantic==2.11.3
 pydantic-core==2.33.1
