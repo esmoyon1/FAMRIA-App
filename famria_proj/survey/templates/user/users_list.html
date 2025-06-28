@@ -40,6 +40,7 @@
                     <td>{{ u.last_login }}</td>  
                     <td>  
                         <div class="btn-group" role="group" aria-label="Basic outlined example">
+                            <a href="{% url 'profile' %}?user_id={{ u.id }}" type="button" class="btn btn-sm btn-outline-info">View</a>  
                             <a href="{% url 'edit_profile' %}?user_id={{ u.id }}" type="button" class="btn btn-sm btn-outline-warning">Edit</a>  
                             <form action="{% url 'users-list' %}" method="post" style="display:inline;">  
                                 {% csrf_token %}  

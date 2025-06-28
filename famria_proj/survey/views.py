@@ -26,6 +26,7 @@ import openai
 # Create your views here.
 
 @login_required
+@role_required(['admin', 'staff'])
 def register(request):
     # Check if the current user is an admin
     if not request.user.is_superuser:
@@ -138,7 +139,7 @@ def user_logout(request):
     return redirect('login')  # Redirect to the login page 
 
 @login_required
-# @role_required(['admin'])
+@role_required(['admin'])
 def users_list(request):
     if request.method == 'POST':
         user_id = request.POST.get('user_id')
@@ -152,7 +153,7 @@ def users_list(request):
                 messages.error(request, 'Cannot delete superuser accounts!')
         return redirect('users-list')
     
-    users = User.objects.filter(is_superuser=False)  # Exclude superusers from the list
+    users = User.objects.all() #filter(is_superuser=False)  # Exclude superusers from the list
     return render(request, 'user/users_list.html', {'users': users})  
 
 def dashboard(request):  
@@ -265,8 +266,8 @@ def survey_detail(request, survey_id):
         'response_count': response_count,  
     })
 
-@login_required
-@role_required(['admin', 'staff', 'enumerator', 'respondent'])
+# @login_required
+# @role_required(['admin', 'staff', 'enumerator', 'respondent'])
 def survey_response(request, survey_id):  
     survey = get_object_or_404(Survey, id=survey_id)  
     assigned_questions = survey.surveyquestion_set.all()  
@@ -471,7 +472,7 @@ def survey_update(request, survey_id):
     return render(request, 'surveys/survey_form.html', {'form': form})  
 
 @login_required
-# @role_required(['admin', 'staff', 'enumerator'])
+@role_required(['admin', 'staff', 'enumerator'])
 def edit_profile(request):
     if request.method == 'POST':
         profile_form = UserProfileForm(request.POST, instance=request.user.profile)
@@ -495,6 +496,7 @@ def survey_delete(request, survey_id):
     return render(request, 'surveys/survey_confirm_delete.html', {'survey': survey})
 
 @require_POST
+@role_required(['admin', 'staff'])
 def reorder_questions(request, survey_id):  
     order = request.POST.getlist('order[]')  # This will give you an ordered list of the question IDs  
     
@@ -504,6 +506,7 @@ def reorder_questions(request, survey_id):
     return JsonResponse({'status': 'success'})  # Return a JSON response
 
 @login_required
+@role_required(['admin', 'staff'])
 def import_questions(request, survey_id):  
     survey = get_object_or_404(Survey, id=survey_id)  
 
@@ -554,6 +557,7 @@ def import_questions(request, survey_id):
     return HttpResponseBadRequest("Invalid request method.", status=400)
 
 @login_required  
+@role_required(['admin', 'staff'])
 def import_responses(request, survey_id):  
     survey = get_object_or_404(Survey, id=survey_id)  
 

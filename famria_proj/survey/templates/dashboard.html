@@ -225,9 +225,17 @@
             {% if user.is_authenticated %}
             <li class="nav-item">
               <a class="nav-link d-flex align-items-center gap-2">
-              <span>Welcome {{ user.profile.role.name}} <br>{{ user}}</span>
+              <span>Welcome {{user}} <br>({{ user.profile.role.name}})</span>
             </a>
             </li>
+            {% if user.profile.role.name != 'respondent' %}
+            <li class="nav-item">
+              <a class="nav-link d-flex align-items-center gap-2" href="{% url 'profile' %}">
+                <span class="material-icons icon">account_circle</span>  
+                My Profile
+              </a>
+            </li>
+            {% endif %}
             {% if user.profile.role.name != 'respondent' %}
             <li class="nav-item">
               <a class="nav-link d-flex align-items-center gap-2" href="{% url 'question-list' %}">
@@ -245,14 +253,6 @@
             </li>
 
             {% if user.is_authenticated %}
-            {% if user.profile.role.name != 'respondent' %}
-            <li class="nav-item">
-              <a class="nav-link d-flex align-items-center gap-2" href="{% url 'edit_profile' %}">
-                <span class="material-icons icon">account_circle</span>  
-                Edit Profile
-              </a>
-            </li>
-            {% endif %}
             {% if user.is_superuser or user.profile.role.name == 'admin' %}
             <li class="nav-item">
               <a class="nav-link d-flex align-items-center gap-2" href="{% url 'users-list' %}">
@@ -390,6 +390,9 @@
       </div>
       
       {% endblock main_content %}
+      <div>
+        <hr>
+      </div>
     </main>
     
    

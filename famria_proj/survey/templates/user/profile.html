@@ -21,16 +21,35 @@
         <div class="card-body">
           <h2 class="card-title mb-4">Welcome, {{ profile.user.username }}</h2>
           <div class="row">
+            <div class="row">
             <div class="col-md-6">
               <h4>Personal Information</h4>
+              <p><strong>Full Name:</strong> 
+                {% if profile.user.get_full_name %}
+                  {{ profile.user.get_full_name }}
+                {% else %}
+                  Not provided
+                {% endif %}
+              </p>
+              <p><strong>First Name:</strong> {{ profile.user.first_name|default:"Not provided" }}</p>
+              <p><strong>Last Name:</strong> {{ profile.user.last_name|default:"Not provided" }}</p>
+              <p><strong>Email:</strong> {{ profile.user.email|default:"Not provided" }}</p>
               <p><strong>Bio:</strong> {{ profile.bio|default:"Not provided" }}</p>
               <p><strong>Phone Number:</strong> {{ profile.phone_number|default:"Not provided" }}</p>
               <p><strong>Location:</strong> {{ profile.location|default:"Not provided" }}</p>
             </div>
             <div class="col-md-6">
               <h4>Account Information</h4>
-              <p><strong>Role:</strong> {{ profile.role.name|title }}</p>
+              <p><strong>Username:</strong> {{ profile.user.username }}</p>
+              <p><strong>Role:</strong> {{ profile.role.get_name_display|default:"Not assigned" }}</p>
               <p><strong>Member Since:</strong> {{ profile.user.date_joined|date:"F j, Y" }}</p>
+              <p><strong>Last Login:</strong> 
+                {% if profile.user.last_login %}
+                  {{ profile.user.last_login|date:"F j, Y H:i" }}
+                {% else %}
+                  Never logged in
+                {% endif %}
+              </p>
             </div>
           </div>
           <div class="mt-4">
