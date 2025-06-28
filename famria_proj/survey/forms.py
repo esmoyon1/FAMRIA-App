@@ -37,13 +37,27 @@ class UserProfileForm(forms.ModelForm):
         required=True,
         empty_label=None
     )
+    first_name = forms.CharField(max_length=30, required=True)  
+    last_name = forms.CharField(max_length=30, required=True)
 
     class Meta:  
         model = UserProfile  
-        fields = ['bio', 'phone_number', 'location', 'role']  
+        fields = ['bio', 'phone_number', 'location', 'role']
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.user:
+            self.fields['first_name'].initial = self.instance.user.first_name
+            self.fields['last_name'].initial = self.instance.user.last_name
 
-    first_name = forms.CharField(max_length=30, required=True)  
-    last_name = forms.CharField(max_length=30, required=True)
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+        profile.user.first_name = self.cleaned_data['first_name']
+        profile.user.last_name = self.cleaned_data['last_name']
+        if commit:
+            profile.user.save()
+            profile.save()
+        return profile
 
 class SurveyForm(forms.ModelForm):  
     class Meta:  

@@ -4,18 +4,24 @@
     
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Available Surveys</h1>
+        
+        {% if user.is_authenticated %} 
         <div class="btn-toolbar mb-2 mb-md-0">
           {% comment %} <div class="btn-group me-2">
             <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
             <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
           </div> {% endcomment %}
+          
+          {% if user.profile.role.name == 'admin' or user.profile.role.name == 'staff' %}
           <a href="{% url 'survey-create' %}" type="button" class="btn btn-sm btn-outline-secondary">
             Create New Survey
           </a>
           <a href="{% url 'survey-responses' %}" type="button" class="btn btn-sm btn-outline-success">Survey Responses
             <span class="badge text-bg-secondary">{{ responses_count }}</span>
           </a>
+          {% endif %}
         </div>
+          {% endif %}
       </div>
      
     <ul class="list-group">  
@@ -40,9 +46,11 @@
                     <a href="{% url 'survey-specific-responses' s.survey.id %}" type="button" class="btn btn-sm btn-outline-success">Survey Responses
                       <span class="badge text-bg-secondary">{{ s.response_count }}</span>
                     </a>
+                    {% if user.profile.role.name == 'admin' or user.profile.role.name == 'staff' %}
                     <a href="{% url 'survey-update' s.survey.id %}" type="button" class="btn btn-sm btn-outline-secondary">Update</a>
                     <a href="{% url 'survey-delete' s.survey.id %}" type="button" class="btn btn-sm btn-outline-danger">Delete</a>
                     <a href="{% url 'survey-analytics' s.survey.id %}" type="button" class="btn btn-sm btn-outline-warning">Analytics</a>
+                    {% endif %}
                     {% endif %}
                   </div>
             </li>  
